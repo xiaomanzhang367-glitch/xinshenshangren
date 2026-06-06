@@ -139,3 +139,20 @@
   transform: translateY(-2px);
   box-shadow: 0 5px 14px rgba(139, 69, 19, 0.45);
 }
+
+.popup-later-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 16px;
+  padding: 10px;
+  background: transparent;
+  color: #888;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.popup-later-btn:hover {
+  background: rgba(0,0,0,0.04);
+}

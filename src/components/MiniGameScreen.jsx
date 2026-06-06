@@ -65,8 +65,6 @@ const MiniGameScreen = ({ wish, onComplete }) => {
             {gameType === '跳台阶' && '💼'}
             {gameType === '连连看' && '🔗'}
             {gameType === '答题' && '❓'}
-            {gameType === '刮刮乐' && '🎟️'}
-            {gameType === '转盘' && '🎡'}
             {gameType === '堆叠' && '📦'}
           </div>
           <h2 className="game-title">{gameConfig.name}</h2>
@@ -102,12 +100,6 @@ const MiniGameScreen = ({ wish, onComplete }) => {
             {gameType === '答题' && (
               <p>快速选择正确答案，答对得分！</p>
             )}
-            {gameType === '刮刮乐' && (
-              <p>滑动刮开卡片，看看你的运气！</p>
-            )}
-            {gameType === '转盘' && (
-              <p>点击转动转盘，获得随机奖励！</p>
-            )}
             {gameType === '堆叠' && (
               <p>点击放置箱子，堆叠到目标高度！</p>
             )}
@@ -125,18 +117,30 @@ const MiniGameScreen = ({ wish, onComplete }) => {
     );
   }
 
+  const handleExit = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (window.confirm('确定要退出本次愿望？将损失 5 香火')) {
+      onComplete(wish, { success: false, option: 'quit', incenseGain: -5, powerCost: 0, gameScore: 0, quit: true });
+    }
+  };
+
+  const handleEarlyWin = () => {
+    if (gameEnded) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    setGameEnded(true);
+    setScore(s => s + 30); // 提前通关奖励
+  };
+
   return (
     <div className="mini-game-container">
-      <GameHeader timeLeft={timeLeft} score={score} gameType={gameType} />
-      {gameType === '接东西' && <CatchGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '配对' && <MatchGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '跳台阶' && <JumpGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '连连看' && <LinkGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '答题' && <QuizGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '刮刮乐' && <ScratchGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '转盘' && <WheelGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      {gameType === '堆叠' && <StackGame score={score} setScore={setScore} gameEnded={gameEnded} />}
-      
+      <GameHeader timeLeft={timeLeft} score={score} gameType={gameType} onExit={handleExit} />
+      {gameType === '接东西' && <CatchGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+      {gameType === '配对' && <MatchGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+      {gameType === '跳台阶' && <JumpGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+      {gameType === '连连看' && <LinkGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+      {gameType === '答题' && <QuizGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+      {gameType === '堆叠' && <StackGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+
       {gameEnded && (
         <GameResult score={score} onComplete={handleComplete} />
       )}
@@ -144,7 +148,7 @@ const MiniGameScreen = ({ wish, onComplete }) => {
   );
 };
 
-const GameHeader = ({ timeLeft, score, gameType }) => (
+const GameHeader = ({ timeLeft, score, gameType, onExit }) => (
   <div className="game-header">
     <div className="time-display">
       <span className="time-icon">⏱️</span>
@@ -154,69 +158,68 @@ const GameHeader = ({ timeLeft, score, gameType }) => (
       <span className="score-icon">
         {gameType === '接东西' && '📚'}
         {gameType === '配对' && '💕'}
-        {gameType === '跳台阶' && '�'}
+        {gameType === '跳台阶' && '💼'}
         {gameType === '连连看' && '🔗'}
         {gameType === '答题' && '❓'}
-        {gameType === '刮刮乐' && '🎟️'}
-        {gameType === '转盘' && '🎡'}
-        {gameType === '堆叠' && '�'}
+        {gameType === '堆叠' && '📦'}
       </span>
       <span className="score-value">{score}分</span>
     </div>
+    <button className="game-exit-btn" onClick={onExit} title="退出游戏（扣5香火）">✕</button>
   </div>
 );
 
-const CatchGame = ({ score, setScore, gameEnded }) => {
+const CatchGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   const [items, setItems] = useState([]);
   const [playerPos, setPlayerPos] = useState(50);
   const gameRef = useRef(null);
+  // 用 ref 镜像当前玩家位置和游戏结束状态，避免重渲染影响 interval
+  const playerPosRef = useRef(50);
+  const gameEndedRef = useRef(false);
+  const caughtCountRef = useRef(0);
 
+  useEffect(() => { gameEndedRef.current = gameEnded; }, [gameEnded]);
+  useEffect(() => { playerPosRef.current = playerPos; }, [playerPos]);
+
+  // 生成物体 - 独立 interval，不再依赖任何 state
   useEffect(() => {
-    if (gameEnded) return;
-
     const dropInterval = setInterval(() => {
+      if (gameEndedRef.current) return;
       const goodItems = ['📚', '📖', '✏️'];
       const badItems = ['🎮', '📱'];
       const itemPool = Math.random() > 0.4 ? goodItems : badItems;
       const emoji = itemPool[Math.floor(Math.random() * itemPool.length)];
       const isGood = goodItems.includes(emoji);
-      
-      const newItem = {
+
+      setItems(prev => [...prev, {
         id: Date.now() + Math.random(),
         emoji,
         x: Math.random() * 70 + 15,
         y: 0,
         isGood
-      };
-      setItems(prev => [...prev, newItem]);
-    }, 1200);
+      }]);
+    }, 1100);
 
     return () => clearInterval(dropInterval);
-  }, [gameEnded]);
+  }, []);
 
+  // 物体下落 + 碰撞检测 - 读取 ref，永不依赖 playerPos
   useEffect(() => {
-    if (gameEnded) return;
-
     const moveInterval = setInterval(() => {
+      if (gameEndedRef.current) return;
       setItems(prev => {
         let newScore = 0;
-        
-        const filtered = prev.map(item => ({
-          ...item,
-          y: item.y + 2.5
-        })).filter(item => {
+        const playerX = playerPosRef.current;
+        const filtered = prev.map(item => ({ ...item, y: item.y + 2.5 })).filter(item => {
           if (item.y >= 85) {
-            if (item.isGood) {
-              newScore -= 3;
-            }
+            if (item.isGood) newScore -= 3;
             return false;
           }
-          
-          const playerWidth = 12;
-          const itemWidth = 8;
-          if (Math.abs(item.x - playerPos) < (playerWidth + itemWidth) / 2 && item.y >= 75 && item.y <= 85) {
+          if (Math.abs(item.x - playerX) < 10 && item.y >= 75 && item.y <= 85) {
             if (item.isGood) {
               newScore += 10;
+              caughtCountRef.current += 1;
+              if (caughtCountRef.current >= 10 && onEarlyWin) onEarlyWin();
             } else {
               newScore -= 8;
             }
@@ -224,67 +227,64 @@ const CatchGame = ({ score, setScore, gameEnded }) => {
           }
           return true;
         });
-
-        if (newScore !== 0) {
-          setScore(s => Math.max(0, s + newScore));
-        }
-        
+        if (newScore !== 0) setScore(s => Math.max(0, s + newScore));
         return filtered;
       });
     }, 50);
 
     return () => clearInterval(moveInterval);
-  }, [gameEnded, playerPos, setScore]);
+  }, [setScore, onEarlyWin]);
 
+  // 键盘控制
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowLeft') {
-        setPlayerPos(prev => Math.max(10, prev - 6));
-      } else if (e.key === 'ArrowRight') {
-        setPlayerPos(prev => Math.min(90, prev + 6));
-      }
+      if (e.key === 'ArrowLeft') setPlayerPos(p => Math.max(10, p - 6));
+      else if (e.key === 'ArrowRight') setPlayerPos(p => Math.min(90, p + 6));
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleTouchMove = (e) => {
+  // 统一 Pointer 事件：触屏/鼠标都走这条
+  const handlePointer = (e) => {
     const rect = gameRef.current?.getBoundingClientRect();
-    if (rect) {
-      const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
-      setPlayerPos(Math.max(10, Math.min(90, x)));
-    }
+    if (!rect) return;
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+    if (clientX === undefined) return;
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    setPlayerPos(Math.max(10, Math.min(90, x)));
   };
 
   return (
-    <div className="game-area" ref={gameRef} onTouchMove={handleTouchMove}>
+    <div
+      className="game-area"
+      ref={gameRef}
+      onPointerMove={handlePointer}
+      onPointerDown={handlePointer}
+      style={{ touchAction: 'none' }}
+    >
       <div className="falling-items">
         {items.map(item => (
           <div
             key={item.id}
             className={`falling-item ${item.isGood ? 'good' : 'bad'}`}
-            style={{
-              left: `${item.x}%`,
-              top: `${item.y}%`,
-              fontSize: '28px'
-            }}
+            style={{ left: `${item.x}%`, top: `${item.y}%`, fontSize: '28px' }}
           >
             {item.emoji}
           </div>
         ))}
       </div>
-      <div 
-        className="player catcher"
-        style={{ left: `${playerPos}%` }}
-      >
+      <div className="player catcher" style={{ left: `${playerPos}%` }}>
         👨‍🎓
+      </div>
+      <div style={{position:'absolute',top:8,right:8,fontSize:11,color:'#888'}}>
+        已接 {caughtCountRef.current}/10
       </div>
     </div>
   );
 };
 
-const MatchGame = ({ score, setScore, gameEnded }) => {
+const MatchGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState(0);
@@ -317,7 +317,11 @@ const MatchGame = ({ score, setScore, gameEnded }) => {
             ? { ...card, matched: true }
             : card
         ));
-        setMatchedPairs(prev => prev + 1);
+        setMatchedPairs(prev => {
+          const next = prev + 1;
+          if (next >= 6 && onEarlyWin) setTimeout(onEarlyWin, 400);
+          return next;
+        });
         setScore(prev => prev + 25);
       } else {
         setTimeout(() => {
@@ -372,7 +376,7 @@ const JUMP_PLATFORMS = [
   { x: 72, y: 13, width: 12 }
 ];
 
-const JumpGame = ({ score, setScore, gameEnded }) => {
+const JumpGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   const gameAreaRef = useRef(null);
 
   // 使用ref存储所有可变游戏状态，彻底避免stale closure
@@ -522,6 +526,7 @@ const JumpGame = ({ score, setScore, gameEnded }) => {
           setScore(prev => prev + baseScore + bonus);
           if (nextIdx >= JUMP_PLATFORMS.length - 1) {
             setScore(prev => prev + 50);
+            if (onEarlyWin) setTimeout(onEarlyWin, 800);
           }
           // 下一跳生成新黄金区间
           s.goldenZone = generateGoldenZone();
@@ -570,11 +575,11 @@ const JumpGame = ({ score, setScore, gameEnded }) => {
     };
   }, []);
 
+  // 统一用 PointerEvents，方向用「按下时的屏幕左右半边」判定
   const getPctX = (e) => {
     const rect = gameAreaRef.current?.getBoundingClientRect();
     if (!rect) return undefined;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return ((clientX - rect.left) / rect.width) * 100;
+    return ((e.clientX - rect.left) / rect.width) * 100;
   };
 
   const { playerX, playerY, currentPlatformIdx, chargePower, charging, fallen, topped, goldenZone, lastJumpHit } = renderState;
@@ -583,11 +588,25 @@ const JumpGame = ({ score, setScore, gameEnded }) => {
     <div
       className="game-area jump-area"
       ref={gameAreaRef}
-      onMouseDown={(e) => { stateRef.current.tapX = getPctX(e); doStartCharge(); }}
-      onMouseUp={(e) => doReleaseJump(getPctX(e))}
-      onMouseLeave={() => { if (stateRef.current.charging) doReleaseJump(undefined); }}
-      onTouchStart={(e) => { e.preventDefault(); stateRef.current.tapX = getPctX(e); doStartCharge(); }}
-      onTouchEnd={(e) => { e.preventDefault(); doReleaseJump(getPctX(e)); }}
+      style={{ touchAction: 'none', userSelect: 'none' }}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        gameAreaRef.current?.setPointerCapture?.(e.pointerId);
+        stateRef.current.tapX = getPctX(e);
+        doStartCharge();
+      }}
+      onPointerUp={(e) => {
+        e.preventDefault();
+        const finalX = getPctX(e);
+        // 方向用屏幕左右半边判定：左半 = 向左跳，右半 = 向右跳
+        const dir = finalX !== undefined && finalX < 50 ? finalX - 60 : finalX;
+        doReleaseJump(dir);
+        gameAreaRef.current?.releasePointerCapture?.(e.pointerId);
+      }}
+      onPointerCancel={(e) => {
+        if (stateRef.current.charging) doReleaseJump(undefined);
+        gameAreaRef.current?.releasePointerCapture?.(e.pointerId);
+      }}
     >
       {/* 平台 */}
       {JUMP_PLATFORMS.map((plat, idx) => (
@@ -667,7 +686,7 @@ const JumpGame = ({ score, setScore, gameEnded }) => {
   );
 };
 
-const LinkGame = ({ score, setScore, gameEnded }) => {
+const LinkGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   const [board, setBoard] = useState([]);
   const [selected, setSelected] = useState([]);
   const [matched, setMatched] = useState([]);
@@ -692,7 +711,11 @@ const LinkGame = ({ score, setScore, gameEnded }) => {
     if (selected.length === 2) {
       const [first, second] = selected;
       if (board[first.row][first.col] === board[second.row][second.col]) {
-        setMatched(prev => [...prev, `${first.row}-${first.col}`, `${second.row}-${second.col}`]);
+        setMatched(prev => {
+          const next = [...prev, `${first.row}-${first.col}`, `${second.row}-${second.col}`];
+          if (next.length / 2 >= 8 && onEarlyWin) setTimeout(onEarlyWin, 400);
+          return next;
+        });
         setScore(prev => prev + 30);
       }
       setTimeout(() => setSelected([]), 300);
@@ -751,15 +774,44 @@ const LinkGame = ({ score, setScore, gameEnded }) => {
   );
 };
 
-const QuizGame = ({ score, setScore, gameEnded }) => {
-  const [questions] = useState([
-    { q: '一年有几个季节？', a: '4', options: ['4', '2', '3'] },
-    { q: '水的化学式是？', a: 'H2O', options: ['H2O', 'CO2', 'O2'] },
-    { q: '地球是圆的吗？', a: '是', options: ['是', '不是', '不知道'] },
-    { q: '太阳从哪边升起？', a: '东边', options: ['东边', '西边', '北边'] },
-    { q: '1+1等于几？', a: '2', options: ['2', '3', '1'] },
-    { q: '人类有几只手？', a: '2', options: ['2', '1', '3'] }
-  ]);
+const QUIZ_BANK = [
+  // 古风神话类
+  { q: '灶王爷每年腊月几日上天汇报？', a: '腊月二十三', options: ['腊月二十三', '腊月初八', '正月初一'] },
+  { q: '月老的红线绑的是凡人的哪个部位？', a: '脚踝', options: ['脚踝', '手腕', '小指'] },
+  { q: '"小神"在天庭一般是几品官？', a: '九品', options: ['九品', '一品', '没有品级'] },
+  { q: '城隍庙主要管理什么？', a: '阴阳两界户籍', options: ['阴阳两界户籍', '凡人婚姻', '财运分配'] },
+  { q: '土地公属于哪个级别的神？', a: '基层神', options: ['基层神', '中央神', '上仙'] },
+  { q: '财神爷比干没有什么？', a: '心', options: ['心', '钱', '坐骑'] },
+  // 职场打工人
+  { q: '"PUA" 是什么意思？', a: '精神操控', options: ['精神操控', '一种舞蹈', '考试制度'] },
+  { q: '"996" 中的 6 指什么？', a: '一周工作6天', options: ['一周工作6天', '工作6小时', '6份工作'] },
+  { q: '凡人最讨厌微信收到哪条消息？', a: '在吗', options: ['在吗', '生日快乐', '红包来了'] },
+  { q: '北漂凡人最怕老板说什么？', a: '辛苦了大家', options: ['辛苦了大家', '今天发工资', '可以下班了'] },
+  { q: 'KPI 没完成会被？', a: '约谈', options: ['约谈', '升职', '发奖金'] },
+  // 网络梗
+  { q: '"塌房" 是什么意思？', a: '偶像人设崩塌', options: ['偶像人设崩塌', '装修事故', '楼盘暴雷'] },
+  { q: '"emo" 表示什么状态？', a: '低落', options: ['低落', '兴奋', '吃饱了'] },
+  { q: '"i人" 中的 i 是什么？', a: '内向', options: ['内向', '聪明', '互联网'] },
+  { q: '"yyds" 全称是？', a: '永远的神', options: ['永远的神', '原因得失', '永远单身'] },
+  // 生活常识
+  { q: '"双十一" 这个购物节是哪天？', a: '11月11日', options: ['11月11日', '10月1日', '12月31日'] },
+  { q: '螺蛳粉的灵魂是什么？', a: '酸笋', options: ['酸笋', '螺蛳', '辣椒'] },
+  { q: '点外卖看到"已送达"但没收到，第一反应？', a: '查监控', options: ['查监控', '再点一份', '算了'] },
+  // 恶搞类
+  { q: '神仙考勤打卡用什么工具？', a: '神识感应', options: ['神识感应', '指纹', '钉钉'] },
+  { q: '玉帝的微信头像最可能是？', a: '云彩', options: ['云彩', '自拍', '宠物'] }
+];
+
+const QuizGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
+  const [questions] = useState(() => {
+    // 随机抽 6 题
+    return [...QUIZ_BANK].sort(() => Math.random() - 0.5).slice(0, 6).map(item => ({
+      q: item.q,
+      a: item.a,
+      // 选项也打乱顺序
+      options: [...item.options].sort(() => Math.random() - 0.5)
+    }));
+  });
   const [currentQ, setCurrentQ] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answered, setAnswered] = useState(false);
@@ -776,9 +828,12 @@ const QuizGame = ({ score, setScore, gameEnded }) => {
     setTimeout(() => {
       if (currentQ < questions.length - 1) {
         setCurrentQ(prev => prev + 1);
+        setSelectedAnswer(null);
+        setAnswered(false);
+      } else {
+        // 答完所有题，提前通关
+        if (onEarlyWin) onEarlyWin();
       }
-      setSelectedAnswer(null);
-      setAnswered(false);
     }, 1000);
   };
 
@@ -808,119 +863,7 @@ const QuizGame = ({ score, setScore, gameEnded }) => {
   );
 };
 
-const ScratchGame = ({ score, setScore, gameEnded }) => {
-  const [revealed, setRevealed] = useState(false);
-  const [prize, setPrize] = useState(null);
-
-  useEffect(() => {
-    if (gameEnded) return;
-    const prizes = [
-      { emoji: '⭐', points: 50 },
-      { emoji: '🌟', points: 40 },
-      { emoji: '✨', points: 30 },
-      { emoji: '💫', points: 25 },
-      { emoji: '⭐', points: 20 },
-      { emoji: '🌟', points: 15 },
-      { emoji: '✨', points: 10 },
-      { emoji: '💫', points: 5 }
-    ];
-    setPrize(prizes[Math.floor(Math.random() * prizes.length)]);
-    setRevealed(false);
-  }, [gameEnded]);
-
-  const handleScratch = () => {
-    if (revealed || gameEnded) return;
-    setRevealed(true);
-    setScore(prev => prev + prize.points);
-  };
-
-  return (
-    <div className="game-area scratch-area">
-      <div className="scratch-card" onClick={handleScratch}>
-        <div className="scratch-content">
-          {revealed ? (
-            <div className="prize-reveal">
-              <span className="prize-emoji">{prize?.emoji}</span>
-              <span className="prize-text">+{prize?.points}分</span>
-            </div>
-          ) : (
-            <div className="scratch-cover">
-              <span>👆 点击刮开</span>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="scratch-hint">
-        {revealed ? '恭喜获得奖励！' : '点击卡片刮开看看运气！'}
-      </div>
-    </div>
-  );
-};
-
-const WheelGame = ({ score, setScore, gameEnded }) => {
-  const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState(null);
-
-  const segments = [
-    { emoji: '🎁', points: 50 },
-    { emoji: '🎈', points: 10 },
-    { emoji: '🎁', points: 30 },
-    { emoji: '🎉', points: 20 },
-    { emoji: '🎁', points: 40 },
-    { emoji: '🎈', points: 15 },
-    { emoji: '🎁', points: 25 },
-    { emoji: '🎉', points: 35 }
-  ];
-
-  const spin = () => {
-    if (spinning || gameEnded) return;
-    setSpinning(true);
-    
-    const spinDuration = 3000;
-    const rotations = 3 + Math.random() * 2;
-    const finalAngle = (rotations * 360) + (Math.random() * 360);
-    
-    setTimeout(() => {
-      const idx = Math.floor((finalAngle % 360) / (360 / segments.length));
-      const prize = segments[idx];
-      setResult(prize);
-      setScore(prev => prev + prize.points);
-      setSpinning(false);
-    }, spinDuration);
-  };
-
-  return (
-    <div className="game-area wheel-area">
-      <div className={`wheel-container ${spinning ? 'spinning' : ''}`}>
-        <div className="wheel" style={{ 
-          transform: spinning ? `rotate(${360 * 5}deg)` : 'rotate(0deg)',
-          transition: spinning ? 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none'
-        }}>
-          {segments.map((seg, idx) => (
-            <div 
-              key={idx} 
-              className="wheel-segment"
-              style={{ transform: `rotate(${idx * 45}deg)` }}
-            >
-              {seg.emoji}
-            </div>
-          ))}
-        </div>
-        <div className="wheel-pointer">▲</div>
-      </div>
-      <button className="spin-btn" onClick={spin} disabled={spinning}>
-        {spinning ? '转动中...' : '🎡 转动转盘'}
-      </button>
-      {result && !spinning && (
-        <div className="wheel-result">
-          {result.emoji} 获得 {result.points} 分！
-        </div>
-      )}
-    </div>
-  );
-};
-
-const StackGame = ({ score, setScore, gameEnded }) => {
+const StackGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   const [boxes, setBoxes] = useState([]);
   const [targetHeight] = useState(8);
   const [nextX, setNextX] = useState(50);
@@ -955,7 +898,11 @@ const StackGame = ({ score, setScore, gameEnded }) => {
       newBox.x = newBox.x < lastBox.x ? lastBox.x : lastBox.x + lastBox.width - overlap;
     }
     
-    setBoxes(prev => [...prev, newBox]);
+    setBoxes(prev => {
+      const next = [...prev, newBox];
+      if (next.length >= targetHeight && onEarlyWin) setTimeout(onEarlyWin, 400);
+      return next;
+    });
     setNextX(20 + Math.random() * 60);
     setScore(prev => prev + 10);
   };

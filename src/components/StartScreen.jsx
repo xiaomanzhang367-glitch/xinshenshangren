@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import PrologueScreen from './PrologueScreen';
 import './StartScreen.css';
 
 const StartScreen = () => {
-  const { startGame } = useGame();
+  const { startGame, setGameState } = useGame();
+  const [showPrologue, setShowPrologue] = useState(false);
+
+  const handlePrologueComplete = (godName) => {
+    setGameState(prev => ({ ...prev, godName }));
+    setShowPrologue(false);
+    startGame();
+  };
+
+  if (showPrologue) {
+    return <PrologueScreen onComplete={handlePrologueComplete} />;
+  }
 
   return (
     <div className="start-screen">
@@ -53,7 +65,7 @@ const StartScreen = () => {
           </div>
         </div>
 
-        <button className="btn btn-primary start-btn" onClick={startGame}>
+        <button className="btn btn-primary start-btn" onClick={() => setShowPrologue(true)}>
           🎯 开始上任
         </button>
 

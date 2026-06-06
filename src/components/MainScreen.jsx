@@ -13,8 +13,15 @@ import MessageNotification from './MessageNotification';
 import './MainScreen.css';
 
 const MainScreen = () => {
-  const { gameState } = useGame();
-  const [currentTab, setCurrentTab] = useState('temple');
+  const { gameState, setGameState } = useGame();
+  const [currentTab, setCurrentTabRaw] = useState('temple');
+
+  const setCurrentTab = (tab) => {
+    setCurrentTabRaw(tab);
+    if (tab === 'gods' && (gameState.groupUnreadCount || 0) > 0) {
+      setGameState(prev => ({ ...prev, groupUnreadCount: 0 }));
+    }
+  };
   const [showMessageList, setShowMessageList] = useState(false);
   const [selectedGod, setSelectedGod] = useState(null);
   const [chatCameFromList, setChatCameFromList] = useState(false);
@@ -79,9 +86,13 @@ const MainScreen = () => {
       {currentTab === 'moments' && <ObservationScreen standalone />}
       {currentTab === 'gods' && <GodChatScreen onClose={() => setCurrentTab('temple')} />}
       {currentTab === 'divine' && <DivineStatusScreen />}
-      {currentTab === 'relations' && <RelationsScreen />}
+      {currentTab === 'relations' && <RelationsScreen onJumpToMoments={() => setCurrentTab('moments')} />}
       
-      <Navigation currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Navigation
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        badges={{ gods: gameState.groupUnreadCount || 0 }}
+      />
       <MessagePopup onEnterPrivateChat={handleEnterPrivateChatFromPopup} />
 
       {showMessageList && (
@@ -103,7 +114,7 @@ const MainScreen = () => {
 };
 
 const MessageListOverlay = ({ onClose, onOpenPrivateChat }) => {
-  const { gameState, selectMessage } = useGame();
+  const { gameState, selectMessage, claimRedPacket } = useGame();
 
   const godsList = Object.values(gameState.gods).filter(god => god.unlocked);
 
@@ -140,9 +151,29 @@ const MessageListOverlay = ({ onClose, onOpenPrivateChat }) => {
           ) : (
             gameState.godMessagesQueue.map((msg) => {
               const god = gameState.gods[msg.godId];
+              if (msg.isRedPacket) {
+                return (
+                  <div
+                    key={msg.id}
+                    className="message-list-item red-packet-item"
+                    onClick={() => {
+                      claimRedPacket(msg.id);
+                    }}
+                  >
+                    <div className="item-avatar">🧧</div>
+                    <div className="item-info">
+                      <div className="item-name">{god?.name || '神仙'} 发来红包</div>
+                      <div className="item-preview">
+                        点击领取 +{msg.amount.incense}🔥 +{msg.amount.power}⚡
+                      </div>
+                    </div>
+                    <div className="item-badge" style={{ background: '#e74c3c' }}>领</div>
+                  </div>
+                );
+              }
               return (
-                <div 
-                  key={msg.id} 
+                <div
+                  key={msg.id}
                   className="message-list-item"
                   onClick={() => {
                     selectMessage(msg);
@@ -381,7 +412,7 @@ const DivineStatusScreen = () => {
   );
 };
 
-const RelationsScreen = () => {
+const RelationsScreen = ({ onJumpToMoments }) => {
   const { gameState } = useGame();
   const [expandedChar, setExpandedChar] = useState(null);
   const characters = Object.values(gameState.characters);
@@ -399,6 +430,29 @@ const RelationsScreen = () => {
 
       <div className="relation-section">
         <h3>👥 凡人信徒</h3>
+
+        {onJumpToMoments && (
+          <button
+            onClick={onJumpToMoments}
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '12px 16px',
+              margin: '8px 0 14px',
+              background: 'linear-gradient(135deg, #d4a574, #c0905a)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '14px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 3px 10px rgba(192, 144, 90, 0.3)'
+            }}
+          >
+            📱 看看我养的人类怎样了 →
+          </button>
+        )}
+
         <div className="character-grid">
           {characters.map(char => {
             const helpCount = processedByChar[char.id] || 0;
@@ -453,7 +507,6 @@ const RelationsScreen = () => {
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: '15px' }}>{god.name}</div>
                 <div style={{ fontSize: '12px', color: '#888' }}>性格：{god.personality}</div>
-                <div style={{ fontSize: '11px', color: '#aaa' }}>联系方式：{god.contactMethod}</div>
               </div>
               <div style={{ fontSize: '11px', color: '#6b8e6b', background: 'rgba(107,142,107,0.1)', padding: '3px 8px', borderRadius: '10px' }}>
                 已解锁

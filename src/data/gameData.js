@@ -151,18 +151,6 @@ export const miniGames = {
     duration: 15,
     powerCost: 8
   },
-  刮刮乐: {
-    name: '幸运刮刮乐',
-    description: '刮开看看运气！',
-    duration: 10,
-    powerCost: 15
-  },
-  转盘: {
-    name: '命运转盘',
-    description: '转动命运之轮！',
-    duration: 8,
-    powerCost: 20
-  },
   堆叠: {
     name: '职场堆叠',
     description: '堆叠箱子到目标！',
@@ -668,7 +656,7 @@ export const wishTemplates = {
       title: '求生意兴隆！',
       description: '神明大人！我的面馆开起来了，可是客人好少...',
       category: '职场',
-      gameType: '刮刮乐',
+      gameType: '接东西',
       options: [
         { text: '吸引客人', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
@@ -679,7 +667,7 @@ export const wishTemplates = {
       title: '求资金周转！',
       description: '神明大人！面馆进货需要钱，求你让我周转一下吧！',
       category: '职场',
-      gameType: '转盘',
+      gameType: '配对',
       options: [
         { text: '全力帮忙', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
         { text: '稍微帮忙', description: '消耗神力10', powerCost: 10, effect: 'normal' },
@@ -701,7 +689,7 @@ export const wishTemplates = {
       title: '求房租不涨！',
       description: '神明大人！房东说下个月要涨三百块房租，现在就够难了，求你让他打消这个念头！',
       category: '财运',
-      gameType: '刮刮乐',
+      gameType: '接东西',
       options: [
         { text: '劝说房东', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '加点运气', description: '消耗神力8', powerCost: 8, effect: 'normal' },
@@ -723,7 +711,7 @@ export const wishTemplates = {
       title: '求遇到贵人！',
       description: '神明大人！这条路太难走了，求你给我指一条明路，或者让我遇到帮助我的贵人！',
       category: '职场',
-      gameType: '转盘',
+      gameType: '配对',
       options: [
         { text: '引荐贵人', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
         { text: '增加运气', description: '消耗神力10', powerCost: 10, effect: 'normal' },
@@ -769,7 +757,7 @@ export const wishTemplates = {
       title: '求谈恋爱！',
       description: '神明大人！看着闺蜜都结婚生子了，我也好想有个伴...',
       category: '姻缘',
-      gameType: '转盘',
+      gameType: '配对',
       options: [
         { text: '红线牵缘', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
         { text: '增加桃花运', description: '消耗神力10', powerCost: 10, effect: 'normal' },
@@ -813,7 +801,7 @@ export const wishTemplates = {
       title: '求买到限量包！',
       description: '神明大人！那个限量款手袋今天正式发售，求你让我抢到！就一个！',
       category: '财运',
-      gameType: '刮刮乐',
+      gameType: '接东西',
       options: [
         { text: '助她抢购', description: '消耗神力12', powerCost: 12, effect: 'excellent' },
         { text: '加点手气', description: '消耗神力6', powerCost: 6, effect: 'normal' },
@@ -837,7 +825,7 @@ export const wishTemplates = {
       title: '求财运！',
       description: '神明大人！最近手气不太好，求您赐我点财运吧！',
       category: '财运',
-      gameType: '刮刮乐',
+      gameType: '接东西',
       options: [
         { text: '赐你财运', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
         { text: '加点运气', description: '消耗神力10', powerCost: 10, effect: 'normal' },
@@ -848,7 +836,7 @@ export const wishTemplates = {
       title: '求健康！',
       description: '神明大人！最近身体不太舒服，求您保佑我健康平安！',
       category: '健康',
-      gameType: '转盘',
+      gameType: '配对',
       options: [
         { text: '保佑健康', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '稍微保佑', description: '消耗神力8', powerCost: 8, effect: 'normal' },
@@ -870,7 +858,7 @@ export const wishTemplates = {
       title: '求今天一切顺利！',
       description: '神明大人！今天有好多重要的事要做，求你让一切都顺顺利利的！',
       category: '运气',
-      gameType: '转盘',
+      gameType: '配对',
       options: [
         { text: '赐你好运', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '稍微加持', description: '消耗神力8', powerCost: 8, effect: 'normal' },
@@ -881,7 +869,7 @@ export const wishTemplates = {
       title: '求找到停车位！',
       description: '神明大人！我开车找停车位找了半个小时了，快要迟到了，救救我！',
       category: '运气',
-      gameType: '刮刮乐',
+      gameType: '接东西',
       options: [
         { text: '腾出车位', description: '消耗神力10', powerCost: 10, effect: 'excellent' },
         { text: '加点运气', description: '消耗神力5', powerCost: 5, effect: 'normal' },
@@ -1040,6 +1028,27 @@ export const godChatStarters = {
     }
   ]
 };
+
+// 神一阵鬼一阵 - 调剂型还愿
+export const trickyWishOutcomes = [
+  { trigger: ['工资', '加薪', '涨工资'], result: '公司给涨了500块，但同时取消了所有补贴和年终奖，算下来一年倒亏2000。' },
+  { trigger: ['孩子', '听话', '懂事'], result: '孩子突然高烧40度，烧得迷迷糊糊，别说顶嘴，连话都说不出来了。' },
+  { trigger: ['咖啡', '现磨'], result: '同事送了一台全自动咖啡机，但从此每天上班第一件事就是帮全部门12个人轮流做咖啡。' },
+  { trigger: ['瘦', '减肥', '体重', '120斤'], result: '大病一场，上吐下泻一周，确实瘦到了120斤，头发也掉了三分之一。' },
+  { trigger: ['暗恋', '喜欢', '相处', '在一起'], result: '公司重组，和暗恋对象分到同一个项目组，但对方成了直属领导，天天骂方案烂。' },
+  { trigger: ['彩票', '中奖', '财运'], result: '中了5块钱，但那张彩票是花了10块钱让跑腿小哥代买的，倒赔5块。' },
+  { trigger: ['休息', '周末', '别打扰'], result: '周五下班手机掉进马桶坏了，彻底失联两天，确实没人打扰，但也刷不了剧、点不了外卖。' },
+  { trigger: ['空调', '吹头'], result: '空调出风口被维修工直接堵死了，整个房间再也不制冷，变成蒸笼。' },
+  { trigger: ['同事', '闭嘴', '安静'], result: '那位同事突发急性喉炎失声两周，但养病期间把所有工作都甩给来做。' },
+  { trigger: ['陪父母', '回家', '亲情'], result: '被公司裁员，打包回老家住了半年，每天被亲妈嫌碍事、催相亲。' }
+];
+
+// 通用兜底
+export const genericTrickyOutcomes = [
+  '愿望确实实现了，但代价是另一件烦心事。',
+  '神仙今天有点皮，结果弄拧了，凡人哭笑不得。',
+  '半瓶神力倒错方向了，凡人收到了一个奇怪的"惊喜"。'
+];
 
 export const triviaQuestions = [
   { question: '中国四大名著是？', answer: '红楼梦西游记水浒传三国演义', options: ['红楼梦西游记水浒传三国演义', '金瓶梅西厢记牡丹亭桃花扇', '封神演义聊斋志异儒林外史'] },

@@ -4,6 +4,20 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.tricky-event {
+  border: 2px solid #8e44ad !important;
+  box-shadow: 0 0 30px rgba(142, 68, 173, 0.5) !important;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
 .screen-content {
   position: relative;
   padding-bottom: 80px;

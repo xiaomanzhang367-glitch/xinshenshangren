@@ -7,9 +7,9 @@ const ResourceBar = ({ onOpenMessages }) => {
   const [showExchange, setShowExchange] = useState(false);
 
   const exchangeOptions = [
-    { incense: 10, power: 8, label: '基础兑换' },
-    { incense: 30, power: 30, label: '优惠兑换', bonus: '+2' },
-    { incense: 50, power: 60, label: '大额兑换', bonus: '+10' }
+    { incense: 5, power: 5, label: '小额兑换 1:1' },
+    { incense: 20, power: 25, label: '优惠兑换', bonus: '+5' },
+    { incense: 50, power: 70, label: '大额兑换', bonus: '+20' }
   ];
 
   const handleExchange = (option) => {

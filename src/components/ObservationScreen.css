@@ -2,6 +2,17 @@
   padding: 0 16px 20px;
 }
 
+.live-likes {
+  font-weight: 700;
+  color: #e74c3c;
+  animation: likePulse 1s ease infinite;
+}
+
+@keyframes likePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
 .observation-intro {
   text-align: center;
   padding: 20px 0;

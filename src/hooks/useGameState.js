@@ -20,6 +20,9 @@ export const useGameState = () => {
     currentMessage: null,
     typingGodId: null,
     unreadCount: 0,
+    godFriendship: { caishen: 0, tudigong: 0, chenghuang: 0, yuelao: 0, zaowang: 0 },
+    redPackets: [], // 神仙红包队列
+    lastReliefAt: 0,
     divineAttributes: {
       order: 50,
       mercy: 50,
@@ -34,6 +37,57 @@ export const useGameState = () => {
 
   const messageTimerRef = useRef(null);
   const lastMessageTimeRef = useRef({});
+
+  // 被动收入：凡人每25秒自动上香+2，神力每25秒自动+1
+  useEffect(() => {
+    const tick = setInterval(() => {
+      setGameState(prev => {
+        if (prev.phase !== 'wish' && prev.phase !== 'result') return prev;
+        return {
+          ...prev,
+          incense: prev.incense + 2,
+          power: Math.min(prev.maxPower, prev.power + 1)
+        };
+      });
+    }, 25000);
+    return () => clearInterval(tick);
+  }, []);
+
+  // 资源死锁救济：香火≤5 且 神力≤5 时，关系最好的神仙发红包
+  useEffect(() => {
+    const checkRelief = setInterval(() => {
+      setGameState(prev => {
+        if (prev.phase !== 'wish') return prev;
+        if (prev.incense > 5 || prev.power > 5) return prev;
+        // 一天只能触发一次（24小时 = 86400000ms，演示用5分钟）
+        if (Date.now() - prev.lastReliefAt < 5 * 60 * 1000) return prev;
+
+        // 找关系最好的神仙
+        const friends = Object.entries(prev.godFriendship)
+          .filter(([id]) => prev.gods[id]?.unlocked)
+          .sort((a, b) => b[1] - a[1]);
+        const [bestGodId] = friends[0] || ['tudigong'];
+        const god = prev.gods[bestGodId];
+
+        const redPacketMsg = {
+          id: `redpacket_${Date.now()}`,
+          godId: bestGodId,
+          isRedPacket: true,
+          amount: { incense: 25, power: 25 },
+          message: `小神别愁，${god.name}给你发个红包，先撑着！`,
+          timestamp: new Date().toLocaleTimeString(),
+          read: false
+        };
+        return {
+          ...prev,
+          godMessagesQueue: [...prev.godMessagesQueue, redPacketMsg],
+          unreadCount: prev.unreadCount + 1,
+          lastReliefAt: Date.now()
+        };
+      });
+    }, 10000);
+    return () => clearInterval(checkRelief);
+  }, []);
 
   const generateGodMessage = useCallback((triggerType, context = {}) => {
     const now = Date.now();
@@ -403,6 +457,21 @@ export const useGameState = () => {
     }));
   }, []);
 
+  const claimRedPacket = useCallback((msgId) => {
+    setGameState(prev => {
+      const msg = prev.godMessagesQueue.find(m => m.id === msgId);
+      if (!msg || !msg.isRedPacket) return prev;
+      return {
+        ...prev,
+        incense: prev.incense + msg.amount.incense,
+        power: Math.min(prev.maxPower, prev.power + msg.amount.power),
+        godMessagesQueue: prev.godMessagesQueue.filter(m => m.id !== msgId),
+        godMessages: [...prev.godMessages, { ...msg, claimed: true }],
+        unreadCount: Math.max(0, prev.unreadCount - 1)
+      };
+    });
+  }, []);
+
   const exchangePower = useCallback(() => {
     if (gameState.incense >= gameConfig.exchangeCost) {
       setGameState(prev => ({
@@ -464,6 +533,7 @@ export const useGameState = () => {
     selectMessage,
     replyToMessage,
     closeMessage,
+    claimRedPacket,
     exchangePower,
     continueGame,
     startGodConversation,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import WishCard from './WishCard';
 import MiniGameScreen from './MiniGameScreen';
-import { wishTemplates } from '../data/gameData';
+import { wishTemplates, trickyWishOutcomes, genericTrickyOutcomes, godMessages } from '../data/gameData';
 import './WishScreen.css';
 
 const WishScreen = () => {
@@ -11,6 +11,7 @@ const WishScreen = () => {
   const [selectedWish, setSelectedWish] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [lastResult, setLastResult] = useState(null); // 结算面板数据
+  const [trickyEvent, setTrickyEvent] = useState(null); // 神一阵鬼一阵彩蛋
 
   useEffect(() => {
     if (gameState.wishes.length < 3 && gameState.phase === 'wish') {
@@ -68,7 +69,15 @@ const WishScreen = () => {
 
   const handleStartMiniGame = (wish, option) => {
     if (gameState.power < option.powerCost) {
-      alert('神力不足！点击顶部的香火图标兑换神力');
+      alert('神力不足！点击神力旁边的+号兑换');
+      return;
+    }
+    // 8% 概率触发"神一阵鬼一阵"
+    if (Math.random() < 0.08) {
+      const text = `${wish.title} ${wish.description}`;
+      const matched = trickyWishOutcomes.find(o => o.trigger.some(t => text.includes(t)));
+      const outcome = matched ? matched.result : genericTrickyOutcomes[Math.floor(Math.random() * genericTrickyOutcomes.length)];
+      setTrickyEvent({ wish, option, outcome });
       return;
     }
     setSelectedWish(wish);
@@ -163,6 +172,20 @@ const WishScreen = () => {
         }
       }
 
+      // 100% 触发群聊（成功1条/失败1条）
+      const groupCount = result.success ? 2 : 1;
+      const allGroup = godMessages.groupChat;
+      const newGroupMsgs = [];
+      for (let i = 0; i < groupCount; i++) {
+        const pick = allGroup[Math.floor(Math.random() * allGroup.length)];
+        newGroupMsgs.push({
+          ...pick,
+          id: `gc_${Date.now()}_${i}`,
+          timestamp: new Date().toLocaleTimeString(),
+          isNew: true
+        });
+      }
+
       return {
         ...prev,
         characters: newCharacters,
@@ -173,6 +196,8 @@ const WishScreen = () => {
         currentWish: null,
         wishesProcessed: (prev.wishesProcessed || 0) + 1,
         totalScore: Math.max(0, (prev.totalScore || 0) + (result.success ? 15 : -3)),
+        groupMessages: [...(prev.groupMessages || []), ...newGroupMsgs],
+        groupUnreadCount: (prev.groupUnreadCount || 0) + groupCount,
         divineAttributes: {
           ...prev.divineAttributes,
           mercy: result.success ? Math.min(100, prev.divineAttributes.mercy + 10) : prev.divineAttributes.mercy,
@@ -257,10 +282,59 @@ const WishScreen = () => {
             onClose={() => setLastResult(null)}
           />
         )}
+
+        {trickyEvent && (
+          <TrickyEventOverlay
+            event={trickyEvent}
+            onConfirm={() => {
+              const { wish, option, outcome } = trickyEvent;
+              // 香火 +30 奖励，神力消耗减半
+              setGameState(prev => ({
+                ...prev,
+                incense: prev.incense + 30,
+                power: Math.max(0, prev.power - Math.floor(option.powerCost / 2)),
+                wishes: prev.wishes.filter(w => w.id !== wish.id),
+                processedWishes: [...prev.processedWishes, { characterId: wish.characterId, templateIndex: wish.templateIndex }],
+                currentWish: null,
+                moments: [{
+                  id: `moment_${Date.now()}`,
+                  characterId: wish.characterId,
+                  content: outcome,
+                  timestamp: new Date().toLocaleTimeString()
+                }, ...prev.moments]
+              }));
+              setTrickyEvent(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
 };
+
+const TrickyEventOverlay = ({ event, onConfirm }) => (
+  <div className="wish-detail-overlay" style={{ background: 'rgba(80, 30, 90, 0.7)' }}>
+    <div className="wish-detail card animate-slide-in tricky-event" onClick={e => e.stopPropagation()}>
+      <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
+        <div style={{ fontSize: '54px', animation: 'shake 0.5s ease' }}>🎲</div>
+        <h3 style={{ background: 'linear-gradient(90deg,#8e44ad,#c0392b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '8px 0', fontSize: '22px' }}>
+          ⚡ 神仙今天有点皮…
+        </h3>
+        <div style={{ fontSize: '12px', color: '#999' }}>"神一阵 · 鬼一阵" 调剂型还愿</div>
+      </div>
+      <div style={{ background: 'rgba(142, 68, 173, 0.08)', padding: '16px', borderRadius: '12px', margin: '12px 0', lineHeight: 1.7, color: '#444', fontSize: '14px' }}>
+        <div style={{ fontSize: '12px', color: '#8e44ad', marginBottom: '6px' }}>📜 凡间真实反馈：</div>
+        "{event.outcome}"
+      </div>
+      <div style={{ textAlign: 'center', fontSize: '11px', color: '#888', margin: '8px 0' }}>
+        🧧 神仙给的补偿：香火 +30 · 神力消耗减半 · 解锁成就「调剂型神明」
+      </div>
+      <button className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} onClick={onConfirm}>
+        哭笑不得，下一个
+      </button>
+    </div>
+  </div>
+);
 
 const ResultOverlay = ({ data, onClose }) => {
   const { wish, character, result, momentText, incenseGain, powerCost, happinessChange } = data;
@@ -350,6 +424,16 @@ const WishDetail = ({ wish, character, onStartMiniGame }) => {
           involvement: Math.max(0, prev.divineAttributes.involvement - 10)
         }
       }));
+    } else if (option.effect === 'pray') {
+      // 简单祈福：跳过小游戏，30%成功
+      const success = Math.random() < 0.3;
+      setGameState(prev => ({
+        ...prev,
+        incense: prev.incense + (success ? option.incenseGain : 1),
+        wishes: prev.wishes.filter(w => w.id !== wish.id),
+        processedWishes: [...prev.processedWishes, { characterId: wish.characterId, templateIndex: wish.templateIndex }],
+        currentWish: null
+      }));
     } else {
       onStartMiniGame(wish, option);
     }
@@ -376,7 +460,7 @@ const WishDetail = ({ wish, character, onStartMiniGame }) => {
         </div>
 
         <div className="options-container">
-          {wish.options.map((option, index) => (
+          {[...wish.options, { text: '🙏 简单祈福', description: '不消耗神力，30%成功率，香火+3', powerCost: 0, effect: 'pray', incenseGain: 3, successRate: 30 }].map((option, index) => (
             <button
               key={index}
               className={`option-btn card ${gameState.power < option.powerCost && option.effect !== 'ignore' ? 'disabled' : ''}`}
