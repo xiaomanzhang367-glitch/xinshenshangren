@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import { miniGames } from '../data/gameData';
+import haptic from '../utils/haptic';
 import './MiniGameScreen.css';
 
 const MiniGameScreen = ({ wish, onComplete }) => {
@@ -65,7 +66,7 @@ const MiniGameScreen = ({ wish, onComplete }) => {
             {gameType === '跳台阶' && '💼'}
             {gameType === '连连看' && '🔗'}
             {gameType === '答题' && '❓'}
-            {gameType === '堆叠' && '📦'}
+            {gameType === '点灯' && '🪷'}
           </div>
           <h2 className="game-title">{gameConfig.name}</h2>
           <p className="game-desc">{gameConfig.description}</p>
@@ -100,8 +101,8 @@ const MiniGameScreen = ({ wish, onComplete }) => {
             {gameType === '答题' && (
               <p>快速选择正确答案，答对得分！</p>
             )}
-            {gameType === '堆叠' && (
-              <p>点击放置箱子，堆叠到目标高度！</p>
+            {gameType === '点灯' && (
+              <p>看清莲花灯亮起的顺序，按顺序点击点亮！连续答对越多分越高～</p>
             )}
           </div>
 
@@ -139,7 +140,7 @@ const MiniGameScreen = ({ wish, onComplete }) => {
       {gameType === '跳台阶' && <JumpGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
       {gameType === '连连看' && <LinkGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
       {gameType === '答题' && <QuizGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
-      {gameType === '堆叠' && <StackGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
+      {gameType === '点灯' && <LightLampGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
 
       {gameEnded && (
         <GameResult score={score} onComplete={handleComplete} />
@@ -161,7 +162,7 @@ const GameHeader = ({ timeLeft, score, gameType, onExit }) => (
         {gameType === '跳台阶' && '💼'}
         {gameType === '连连看' && '🔗'}
         {gameType === '答题' && '❓'}
-        {gameType === '堆叠' && '📦'}
+        {gameType === '点灯' && '🪷'}
       </span>
       <span className="score-value">{score}分</span>
     </div>
@@ -454,10 +455,13 @@ const JumpGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
     let hitType;
     if (power >= zone.start && power <= zone.end) {
       hitType = 'perfect';
+      haptic.heavy();
     } else if (power >= zone.start - 8 && power <= zone.end + 8) {
       hitType = 'good';
+      haptic.medium();
     } else {
       hitType = 'miss';
+      haptic.error();
     }
     s.lastJumpHit = hitType;
 
@@ -686,89 +690,185 @@ const JumpGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   );
 };
 
-const LinkGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
-  const [board, setBoard] = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [matched, setMatched] = useState([]);
+// 开心消消乐 — 7x7 网格，6 种神主题图案，3 连消除
+const LINK_ICONS = ['🪷', '🍑', '🪙', '🌸', '🍀', '⛩️'];
+const GRID_ROWS = 7;
+const GRID_COLS = 7;
 
-  useEffect(() => {
-    if (gameEnded) return;
-    
-    const emojis = ['🌸', '🌺', '🌻', '🌹', '🌷', '🌼', '💐', '🌵'];
-    const pairs = [...emojis, ...emojis];
-    const shuffled = pairs.sort(() => Math.random() - 0.5);
-    
-    const newBoard = [];
-    for (let i = 0; i < 4; i++) {
-      newBoard.push(shuffled.slice(i * 4, (i + 1) * 4));
+const makeRandomGrid = () => {
+  const g = [];
+  for (let r = 0; r < GRID_ROWS; r++) {
+    const row = [];
+    for (let c = 0; c < GRID_COLS; c++) {
+      row.push(LINK_ICONS[Math.floor(Math.random() * LINK_ICONS.length)]);
     }
-    setBoard(newBoard);
-    setSelected([]);
-    setMatched([]);
-  }, [gameEnded]);
+    g.push(row);
+  }
+  return g;
+};
 
-  useEffect(() => {
-    if (selected.length === 2) {
-      const [first, second] = selected;
-      if (board[first.row][first.col] === board[second.row][second.col]) {
-        setMatched(prev => {
-          const next = [...prev, `${first.row}-${first.col}`, `${second.row}-${second.col}`];
-          if (next.length / 2 >= 8 && onEarlyWin) setTimeout(onEarlyWin, 400);
-          return next;
-        });
-        setScore(prev => prev + 30);
+// 找所有 3 连
+const findMatches = (g) => {
+  const matched = new Set();
+  // 横向
+  for (let r = 0; r < GRID_ROWS; r++) {
+    let run = 1;
+    for (let c = 1; c < GRID_COLS; c++) {
+      if (g[r][c] && g[r][c] === g[r][c - 1]) {
+        run++;
+      } else {
+        if (run >= 3) {
+          for (let k = 1; k <= run; k++) matched.add(`${r}-${c - k}`);
+        }
+        run = 1;
       }
-      setTimeout(() => setSelected([]), 300);
     }
-  }, [selected, board]);
+    if (run >= 3) {
+      for (let k = 1; k <= run; k++) matched.add(`${r}-${GRID_COLS - k}`);
+    }
+  }
+  // 纵向
+  for (let c = 0; c < GRID_COLS; c++) {
+    let run = 1;
+    for (let r = 1; r < GRID_ROWS; r++) {
+      if (g[r][c] && g[r][c] === g[r - 1][c]) {
+        run++;
+      } else {
+        if (run >= 3) {
+          for (let k = 1; k <= run; k++) matched.add(`${r - k}-${c}`);
+        }
+        run = 1;
+      }
+    }
+    if (run >= 3) {
+      for (let k = 1; k <= run; k++) matched.add(`${GRID_ROWS - k}-${c}`);
+    }
+  }
+  return matched;
+};
 
-  const canLink = (r1, c1, r2, c2) => {
-    if (r1 === r2 && c1 === c2) return false;
-    if (board[r1][c1] !== board[r2][c2]) return false;
-    if (matched.includes(`${r1}-${c1}`) || matched.includes(`${r2}-${c2}`)) return false;
-    return true;
+// 把 matched 标记的格子去掉，上方掉下来
+const collapse = (g) => {
+  const next = g.map(row => [...row]);
+  for (let c = 0; c < GRID_COLS; c++) {
+    let writeR = GRID_ROWS - 1;
+    for (let r = GRID_ROWS - 1; r >= 0; r--) {
+      if (next[r][c]) {
+        next[writeR][c] = next[r][c];
+        writeR--;
+      }
+    }
+    for (let r = writeR; r >= 0; r--) {
+      next[r][c] = LINK_ICONS[Math.floor(Math.random() * LINK_ICONS.length)];
+    }
+  }
+  return next;
+};
+
+const LinkGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
+  const [grid, setGrid] = useState(() => {
+    // 初始无 3 连
+    let g = makeRandomGrid();
+    let safety = 0;
+    while (findMatches(g).size > 0 && safety < 20) {
+      g = makeRandomGrid();
+      safety++;
+    }
+    return g;
+  });
+  const [selected, setSelected] = useState(null);
+  const [combo, setCombo] = useState(0);
+  const [animFlash, setAnimFlash] = useState(null);
+  const [eliminatedTotal, setEliminatedTotal] = useState(0);
+  const TARGET = 40;
+
+  const isAdjacent = (a, b) =>
+    (a.r === b.r && Math.abs(a.c - b.c) === 1) ||
+    (a.c === b.c && Math.abs(a.r - b.r) === 1);
+
+  // 触发 / 连锁消除
+  const processMatches = (g, comboCount = 1) => {
+    const matches = findMatches(g);
+    if (matches.size === 0) {
+      setCombo(0);
+      return;
+    }
+    setAnimFlash(matches);
+    haptic.medium();
+    // 计分（连锁 × 2 × 3 …）
+    const gain = matches.size * 10 * comboCount;
+    setScore(s => s + gain);
+    setEliminatedTotal(t => {
+      const nt = t + matches.size;
+      if (nt >= TARGET && onEarlyWin) setTimeout(onEarlyWin, 600);
+      return nt;
+    });
+    setCombo(comboCount);
+
+    // 200ms 后掉落 + 重新检测
+    setTimeout(() => {
+      const cleared = g.map((row, r) => row.map((cell, c) => matches.has(`${r}-${c}`) ? null : cell));
+      const collapsed = collapse(cleared);
+      setGrid(collapsed);
+      setAnimFlash(null);
+      // 递归连锁
+      setTimeout(() => processMatches(collapsed, comboCount + 1), 200);
+    }, 300);
   };
 
-  const handleClick = (row, col) => {
-    if (gameEnded) return;
-    if (selected.length >= 2) return;
-    if (matched.includes(`${row}-${col}`)) return;
-    
-    if (selected.length === 1) {
-      const [prev] = selected;
-      if (canLink(prev.row, prev.col, row, col)) {
-        setSelected([prev, { row, col }]);
-      } else {
-        setSelected([{ row, col }]);
-      }
-    } else {
-      setSelected([{ row, col }]);
+  const handleCellClick = (r, c) => {
+    if (gameEnded || animFlash) return;
+    haptic.light();
+    if (!selected) {
+      setSelected({ r, c });
+      return;
     }
+    if (selected.r === r && selected.c === c) {
+      setSelected(null);
+      return;
+    }
+    if (!isAdjacent(selected, { r, c })) {
+      setSelected({ r, c });
+      return;
+    }
+    // 交换试试
+    const newGrid = grid.map(row => [...row]);
+    [newGrid[selected.r][selected.c], newGrid[r][c]] = [newGrid[r][c], newGrid[selected.r][selected.c]];
+    if (findMatches(newGrid).size === 0) {
+      // 无效交换，回弹
+      haptic.error();
+      setSelected(null);
+      return;
+    }
+    setGrid(newGrid);
+    setSelected(null);
+    setTimeout(() => processMatches(newGrid, 1), 100);
   };
 
   return (
-    <div className="game-area link-area">
-      <div className="link-board">
-        {board.map((row, rowIdx) => (
-          <div key={rowIdx} className="link-row">
-            {row.map((cell, colIdx) => {
-              const isSelected = selected.some(s => s.row === rowIdx && s.col === colIdx);
-              const isMatched = matched.includes(`${rowIdx}-${colIdx}`);
-              return (
-                <button
-                  key={`${rowIdx}-${colIdx}`}
-                  className={`link-cell ${isSelected ? 'selected' : ''} ${isMatched ? 'matched' : ''}`}
-                  onClick={() => handleClick(rowIdx, colIdx)}
-                >
-                  {!isMatched && cell}
-                </button>
-              );
-            })}
-          </div>
-        ))}
+    <div className="game-area xiaoxiaole-area">
+      <div className="xiaoxiao-header">
+        <div>已消 {eliminatedTotal}/{TARGET}</div>
+        {combo > 1 && <div className="combo-tag">COMBO ×{combo} 🔥</div>}
       </div>
-      <div className="link-status">
-        <span>已消除: {matched.length / 2}/8</span>
+      <div className="xiaoxiao-grid">
+        {grid.map((row, r) => row.map((cell, c) => {
+          const isSel = selected && selected.r === r && selected.c === c;
+          const isFlash = animFlash && animFlash.has(`${r}-${c}`);
+          return (
+            <button
+              key={`${r}-${c}`}
+              className={`xx-cell ${isSel ? 'sel' : ''} ${isFlash ? 'flash' : ''}`}
+              onClick={() => handleCellClick(r, c)}
+              style={{ touchAction: 'manipulation' }}
+            >
+              {cell}
+            </button>
+          );
+        }))}
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 11, color: '#888', marginTop: 8 }}>
+        点击两个相邻格子交换，3 连成消除
       </div>
     </div>
   );
@@ -863,83 +963,104 @@ const QuizGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
   );
 };
 
-const StackGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
-  const [boxes, setBoxes] = useState([]);
-  const [targetHeight] = useState(8);
-  const [nextX, setNextX] = useState(50);
-  const [gameOver, setGameOver] = useState(false);
+// 功德点灯 — 节奏游戏：莲花灯按顺序亮起，玩家依次点击
+const LightLampGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
+  const [sequence, setSequence] = useState([]);
+  const [playerIdx, setPlayerIdx] = useState(0);
+  const [showing, setShowing] = useState(false);
+  const [showingIdx, setShowingIdx] = useState(-1);
+  const [round, setRound] = useState(0);
+  const [feedback, setFeedback] = useState(null); // 'good' | 'miss'
+  const TOTAL_ROUNDS = 8;
 
+  const generateNext = () => {
+    setSequence(prev => [...prev, Math.floor(Math.random() * 6)]);
+    setPlayerIdx(0);
+    setRound(r => r + 1);
+  };
+
+  // 初始：先生成一个起始序列
   useEffect(() => {
     if (gameEnded) return;
-    setBoxes([]);
-    setNextX(50);
-    setGameOver(false);
+    setSequence([Math.floor(Math.random() * 6), Math.floor(Math.random() * 6)]);
+    setRound(1);
   }, [gameEnded]);
 
-  const addBox = () => {
-    if (gameOver || gameEnded) return;
-    
-    const newBox = {
-      id: Date.now(),
-      x: nextX,
-      width: 20 + Math.random() * 10
-    };
-    
-    if (boxes.length > 0) {
-      const lastBox = boxes[boxes.length - 1];
-      const overlap = Math.max(0, Math.min(lastBox.width, newBox.width) - Math.abs(newBox.x - lastBox.x));
-      
-      if (overlap < 5) {
-        setGameOver(true);
+  // 展示序列
+  useEffect(() => {
+    if (sequence.length === 0 || gameEnded) return;
+    setShowing(true);
+    setShowingIdx(-1);
+    let i = 0;
+    const showTimer = setInterval(() => {
+      if (i >= sequence.length) {
+        clearInterval(showTimer);
+        setShowing(false);
+        setShowingIdx(-1);
+        setPlayerIdx(0);
         return;
       }
-      
-      newBox.width = overlap;
-      newBox.x = newBox.x < lastBox.x ? lastBox.x : lastBox.x + lastBox.width - overlap;
+      setShowingIdx(sequence[i]);
+      i++;
+      setTimeout(() => setShowingIdx(-1), 350);
+    }, 600);
+    return () => clearInterval(showTimer);
+  }, [sequence.length, gameEnded]);
+
+  const handleLamp = (i) => {
+    if (showing || gameEnded || feedback) return;
+    if (i === sequence[playerIdx]) {
+      haptic.light();
+      if (playerIdx + 1 >= sequence.length) {
+        // 本轮通关
+        haptic.medium();
+        setFeedback('good');
+        setScore(s => s + 15 + round * 2);
+        setTimeout(() => {
+          setFeedback(null);
+          if (round >= TOTAL_ROUNDS) {
+            if (onEarlyWin) onEarlyWin();
+          } else {
+            generateNext();
+          }
+        }, 500);
+      } else {
+        setPlayerIdx(p => p + 1);
+      }
+    } else {
+      haptic.error();
+      setFeedback('miss');
+      setScore(s => Math.max(0, s - 8));
+      setTimeout(() => {
+        setFeedback(null);
+        // 重置本轮
+        setPlayerIdx(0);
+      }, 700);
     }
-    
-    setBoxes(prev => {
-      const next = [...prev, newBox];
-      if (next.length >= targetHeight && onEarlyWin) setTimeout(onEarlyWin, 400);
-      return next;
-    });
-    setNextX(20 + Math.random() * 60);
-    setScore(prev => prev + 10);
   };
 
   return (
-    <div className="game-area stack-area">
-      <div className="stack-target">
-        <span>目标: {targetHeight}层</span>
+    <div className="game-area lamp-area">
+      <div style={{ textAlign: 'center', color: '#8b4513', fontSize: 14, fontWeight: 700, marginBottom: 10 }}>
+        第 {round} / {TOTAL_ROUNDS} 轮
       </div>
-      <div className="stack-platform">
-        <div 
-          className="base-platform"
-          style={{ left: '25%', width: '50%' }}
-        >
-          🧱
-        </div>
-        {boxes.map((box, idx) => (
-          <div
-            key={box.id}
-            className="stack-box"
-            style={{ 
-              left: `${box.x - box.width / 2}%`, 
-              width: `${box.width}%`,
-              bottom: `${idx * 6}%`
-            }}
+      <div style={{ textAlign: 'center', color: '#888', fontSize: 12, marginBottom: 16 }}>
+        {showing ? '看好顺序…' : feedback === 'good' ? '🎉 太棒了！' : feedback === 'miss' ? '😢 顺序错了' : `按顺序点亮 ${sequence.length} 盏灯`}
+      </div>
+      <div className="lamp-grid">
+        {[0, 1, 2, 3, 4, 5].map(i => (
+          <button
+            key={i}
+            className={`lamp ${showingIdx === i ? 'lit' : ''} ${feedback === 'miss' ? 'shake' : ''}`}
+            onClick={() => handleLamp(i)}
+            disabled={showing}
           >
-            📦
-          </div>
+            🪷
+          </button>
         ))}
       </div>
-      <div className="stack-controls">
-        <button className="stack-btn" onClick={addBox} disabled={gameOver || boxes.length >= targetHeight}>
-          {gameOver ? '游戏结束' : boxes.length >= targetHeight ? '🎉 完成！' : '⬇️ 放置箱子'}
-        </button>
-      </div>
-      <div className="stack-progress">
-        <span>进度: {boxes.length}/{targetHeight}</span>
+      <div style={{ textAlign: 'center', marginTop: 16, color: '#666', fontSize: 12 }}>
+        进度：{playerIdx} / {sequence.length}
       </div>
     </div>
   );

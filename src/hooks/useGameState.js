@@ -23,6 +23,7 @@ export const useGameState = () => {
     godFriendship: { caishen: 0, tudigong: 0, chenghuang: 0, yuelao: 0, zaowang: 0 },
     redPackets: [], // 神仙红包队列
     lastReliefAt: 0,
+    godName: '',
     divineAttributes: {
       order: 50,
       mercy: 50,
@@ -366,19 +367,39 @@ export const useGameState = () => {
   }, [gameState.characters, addMoment, generateNewWishes, updateDivineAttributes, triggerGodMessage]);
 
   const startGame = useCallback(() => {
-    const initialMessages = godMessages.greeting.slice(0, 2).map(msg => ({
-      ...msg,
-      timestamp: new Date().toLocaleTimeString(),
-      read: false
-    }));
-    
-    setGameState(prev => ({
-      ...prev,
-      phase: 'wish',
-      godMessagesQueue: initialMessages,
-      unreadCount: initialMessages.length
-    }));
-    
+    setGameState(prev => {
+      const name = prev.godName || '小神';
+      // 个性化欢迎语：第一条用神号叫
+      const personalizedGreeting = {
+        id: `welcome_${Date.now()}`,
+        godId: 'tudigong',
+        message: `${name}！欢迎来到神庙！我是隔壁工位的土地公，有事吱声~`,
+        options: [
+          { text: '土地公你好！', result: { incense: 5, reply: `哈哈，看你这反应挺机灵啊。` } },
+          { text: '我先看看再说', result: { incense: 0, reply: `行行，自己上手最快。` } }
+        ],
+        timestamp: new Date().toLocaleTimeString(),
+        read: false
+      };
+      const personalizedGreeting2 = {
+        id: `welcome2_${Date.now()}`,
+        godId: 'caishen',
+        message: `${name}是吧？我是财神，香火的事问我准没错。`,
+        options: [
+          { text: '请多关照！', result: { incense: 8, reply: '哈哈，互相帮衬。' } },
+          { text: '财神你好', result: { incense: 3, reply: '嗯，态度可以。' } }
+        ],
+        timestamp: new Date().toLocaleTimeString(),
+        read: false
+      };
+      return {
+        ...prev,
+        phase: 'wish',
+        godMessagesQueue: [personalizedGreeting, personalizedGreeting2],
+        unreadCount: 2
+      };
+    });
+
     startMessageTimer();
   }, [startMessageTimer]);
 
@@ -396,7 +417,10 @@ export const useGameState = () => {
   }, []);
 
   const replyToMessage = useCallback((messageId, optionIndex) => {
-    const message = gameState.currentMessage || gameState.godMessagesQueue.find(m => m.id === messageId);
+    const message =
+      gameState.currentMessage ||
+      gameState.godMessagesQueue.find(m => m.id === messageId) ||
+      gameState.godMessages.find(m => m.id === messageId);
     if (!message) return;
 
     const option = message.options[optionIndex];
@@ -422,11 +446,13 @@ export const useGameState = () => {
     setGameState(prev => ({
       ...prev,
       incense: prev.incense + option.result.incense,
-      godMessages: [
-        ...prev.godMessages,
-        archivedOriginal,
-        playerMsg
-      ],
+      // 如果原消息已经在 godMessages 里（弹窗→小窗那条已沉淀），更新它的 options 标记为 answered
+      godMessages: prev.godMessages.find(m => m.id === message.id)
+        ? [
+            ...prev.godMessages.map(m => m.id === message.id ? archivedOriginal : m),
+            playerMsg
+          ]
+        : [...prev.godMessages, archivedOriginal, playerMsg],
       godMessagesQueue: prev.godMessagesQueue.filter(m => m.id !== message.id),
       currentMessage: null,
       typingGodId: message.godId

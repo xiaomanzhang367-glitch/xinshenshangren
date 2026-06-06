@@ -400,6 +400,136 @@
   50% { opacity: 1; }
 }
 
+/* 开心消消乐 */
+.xiaoxiaole-area {
+  padding: 12px;
+  background: linear-gradient(180deg, #fdf6e3, #f5e7c5);
+}
+
+.xiaoxiao-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #8b4513;
+  font-weight: 700;
+}
+
+.combo-tag {
+  background: linear-gradient(135deg, #ff7800, #ffd700);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  animation: comboPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 12px rgba(255, 120, 0, 0.5);
+}
+
+@keyframes comboPop {
+  0% { transform: scale(0.5); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.xiaoxiao-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 8px;
+  background: rgba(139, 69, 19, 0.1);
+  border-radius: 12px;
+}
+
+.xx-cell {
+  aspect-ratio: 1;
+  font-size: 22px;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xx-cell:hover {
+  background: #fff8e1;
+}
+
+.xx-cell.sel {
+  border-color: #d4a574;
+  background: #fff3cd;
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(212, 165, 116, 0.6);
+}
+
+.xx-cell.flash {
+  animation: cellPop 0.3s ease forwards;
+}
+
+@keyframes cellPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3) rotate(15deg); background: #ffd700; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* 功德点灯 */
+.lamp-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px;
+  background: linear-gradient(180deg, #2a1845 0%, #4a2c5e 100%);
+  height: 100%;
+}
+
+.lamp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.lamp {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 230, 180, 0.15), rgba(120, 80, 40, 0.3));
+  border: 2px solid rgba(255, 200, 120, 0.3);
+  font-size: 42px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: grayscale(0.6) brightness(0.5);
+  position: relative;
+}
+
+.lamp:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.lamp.lit {
+  background: radial-gradient(circle, #ffd700, #ff7800);
+  border-color: #ffd700;
+  filter: grayscale(0) brightness(1.5);
+  box-shadow: 0 0 30px #ffae00, 0 0 60px rgba(255, 174, 0, 0.5);
+  transform: scale(1.15);
+}
+
+.lamp.shake {
+  animation: lampShake 0.4s ease;
+}
+
+@keyframes lampShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
 .game-exit-btn {
   width: 32px;
   height: 32px;

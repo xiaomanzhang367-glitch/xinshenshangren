@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import haptic from '../utils/haptic';
 import './ResourceBar.css';
 
 const ResourceBar = ({ onOpenMessages }) => {
@@ -14,6 +15,7 @@ const ResourceBar = ({ onOpenMessages }) => {
 
   const handleExchange = (option) => {
     if (gameState.incense >= option.incense) {
+      haptic.success();
       setGameState(prev => ({
         ...prev,
         incense: prev.incense - option.incense,
@@ -21,6 +23,7 @@ const ResourceBar = ({ onOpenMessages }) => {
       }));
       setShowExchange(false);
     } else {
+      haptic.error();
       alert(`香火不足！需要${option.incense}香火`);
     }
   };

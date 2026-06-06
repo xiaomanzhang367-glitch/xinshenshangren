@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { godChatStarters } from '../data/gameData';
 import { useGame } from '../context/GameContext';
+import haptic from '../utils/haptic';
 import StartScreen from './StartScreen';
 import WishScreen from './WishScreen';
 import ResultScreen from './ResultScreen';
@@ -157,6 +158,7 @@ const MessageListOverlay = ({ onClose, onOpenPrivateChat }) => {
                     key={msg.id}
                     className="message-list-item red-packet-item"
                     onClick={() => {
+                      haptic.success();
                       claimRedPacket(msg.id);
                     }}
                   >
@@ -286,10 +288,14 @@ const PrivateChatScreen = ({ godId, onClose, cameFromList }) => {
 
         <div className="chat-input-area">
           {currentReplyOptions.length > 0 && (
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ fontSize: '12px', color: '#888', marginBottom: '4px', paddingLeft: '4px' }}>回复{god?.name}：</div>
+            <div className="quick-reply-bubbles">
+              <div className="quick-reply-label">👇 选一条回复 {god?.name}</div>
               {currentReplyOptions.map((opt, idx) => (
-                <button key={idx} className="reply-option-btn" onClick={() => handleReply(idx)}>
+                <button
+                  key={idx}
+                  className="quick-reply-btn"
+                  onClick={() => { haptic.light(); handleReply(idx); }}
+                >
                   {opt.text}
                 </button>
               ))}
@@ -323,38 +329,125 @@ const PrivateChatScreen = ({ godId, onClose, cameFromList }) => {
 };
 
 const GodChatScreen = ({ onClose }) => {
-  const { gameState } = useGame();
-  
+  const { gameState, setGameState } = useGame();
+  const [input, setInput] = useState('');
+  const chatEndRef = useRef(null);
+
   const groupMessages = gameState.groupMessages || [];
+
+  React.useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [groupMessages.length]);
+
+  const handleSend = () => {
+    const text = input.trim();
+    if (!text) return;
+    haptic.light();
+    const name = gameState.godName || '新神';
+    const playerMsg = {
+      id: `gc_player_${Date.now()}`,
+      godId: 'player',
+      message: text,
+      timestamp: new Date().toLocaleTimeString(),
+      isPlayer: true,
+      playerName: name
+    };
+    setGameState(prev => ({
+      ...prev,
+      groupMessages: [...(prev.groupMessages || []), playerMsg]
+    }));
+    setInput('');
+
+    // 1秒后随机1-2位神仙回复
+    setTimeout(() => {
+      const gods = ['caishen', 'tudigong', 'chenghuang', 'yuelao', 'zaowang'];
+      const replies = [
+        '哈哈哈，我支持小神！',
+        '说得对，再来一个！',
+        '我的天，小神你太可了。',
+        '@新神 这事我同意。',
+        '不要管他，听我的。',
+        '哎呀今天忙得很，先看群一眼。',
+        '小神别闹，群里别水了。',
+        '我饿了，先去吃个桃。',
+        '哈哈这话我也想说。',
+        '同意，加一。',
+        '哎，凡间真的难。',
+        '小神你这文笔不错。',
+        '这就是新时代神仙的风格啊',
+        '收到，签字下放神力。',
+        '哈哈哈，你今天怎么这么活泛？'
+      ];
+      const replyCount = Math.random() > 0.5 ? 2 : 1;
+      const msgs = [];
+      for (let i = 0; i < replyCount; i++) {
+        const godId = gods[Math.floor(Math.random() * gods.length)];
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+        msgs.push({
+          id: `gc_reply_${Date.now()}_${i}`,
+          godId,
+          message: reply,
+          timestamp: new Date().toLocaleTimeString()
+        });
+      }
+      setGameState(prev => ({
+        ...prev,
+        groupMessages: [...(prev.groupMessages || []), ...msgs]
+      }));
+    }, 1200);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   return (
     <div className="god-chat-screen">
       <div className="screen-header">
-        <h2>💬 神仙工作群</h2>
+        <h2>💬 神仙工作群（5位神仙 + 你）</h2>
       </div>
-      
+
       <div className="messages-container">
         {groupMessages.length === 0 ? (
           <div className="empty-state">
             <p>群聊还没有消息...</p>
-            <p>处理愿望后神仙们会在这里讨论！</p>
+            <p>处理愿望或发个话题，神仙们就来啦！</p>
           </div>
         ) : (
-          groupMessages.map(msg => (
-            <div key={msg.id} className="god-message animate-slide-in">
-              <div className="god-avatar">
-                {gameState.gods[msg.godId]?.avatar || '👤'}
-              </div>
-              <div className="message-content">
-                <div className="god-name">
-                  {gameState.gods[msg.godId]?.name || '神秘神明'}
+          groupMessages.map(msg => {
+            const isPlayer = msg.isPlayer;
+            return (
+              <div key={msg.id} className={`god-message animate-slide-in ${isPlayer ? 'player-message' : ''}`}>
+                <div className="god-avatar">
+                  {isPlayer ? '⛩️' : (gameState.gods[msg.godId]?.avatar || '👤')}
                 </div>
-                <div className="message-text">{msg.message}</div>
-                <div className="message-time">{msg.timestamp}</div>
+                <div className="message-content">
+                  <div className="god-name">
+                    {isPlayer ? `${msg.playerName || '我'}（你）` : (gameState.gods[msg.godId]?.name || '神秘神明')}
+                  </div>
+                  <div className="message-text">{msg.message}</div>
+                  <div className="message-time">{msg.timestamp}</div>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
+        <div ref={chatEndRef} />
+      </div>
+
+      <div className="group-chat-input">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="说点啥吧，神仙们都在线..."
+          maxLength={80}
+        />
+        <button onClick={handleSend} disabled={!input.trim()}>发送</button>
       </div>
     </div>
   );

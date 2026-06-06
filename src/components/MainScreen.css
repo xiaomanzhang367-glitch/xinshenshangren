@@ -629,6 +629,110 @@
   border: 1px solid var(--border-color);
 }
 
+.player-message {
+  flex-direction: row-reverse;
+}
+.player-message .message-content {
+  background: linear-gradient(135deg, #8b4513, #a0522d) !important;
+  color: white;
+  margin-right: 10px;
+  margin-left: 0;
+}
+.player-message .god-name {
+  color: rgba(255,255,255,0.85) !important;
+}
+.player-message .message-text {
+  color: white !important;
+}
+.player-message .message-time {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.quick-reply-bubbles {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(212, 165, 116, 0.05));
+  border: 1px dashed #c0905a;
+  border-radius: 14px;
+  animation: pulseAttention 1.5s ease-out;
+}
+
+.quick-reply-label {
+  font-size: 12px;
+  color: #8b4513;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.quick-reply-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  background: white;
+  border: 1px solid #d4a574;
+  border-radius: 18px;
+  color: #5a3820;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quick-reply-btn:hover {
+  background: #d4a574;
+  color: white;
+  transform: translateX(4px);
+}
+
+.quick-reply-btn:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes pulseAttention {
+  0% { transform: scale(0.95); opacity: 0; }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.group-chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #fffaf5;
+  border-top: 1px solid var(--border-color);
+  position: sticky;
+  bottom: 70px;
+}
+.group-chat-input input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+}
+.group-chat-input input:focus {
+  border-color: #d4a574;
+  box-shadow: 0 0 0 2px rgba(212, 165, 116, 0.2);
+}
+.group-chat-input button {
+  padding: 0 20px;
+  background: linear-gradient(135deg, #8b4513, #a0522d);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+.group-chat-input button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .player-bubble {
   background: linear-gradient(135deg, #8b4513, #a0522d);
   color: white;

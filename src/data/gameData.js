@@ -151,10 +151,10 @@ export const miniGames = {
     duration: 15,
     powerCost: 8
   },
-  堆叠: {
-    name: '职场堆叠',
-    description: '堆叠箱子到目标！',
-    duration: 20,
+  点灯: {
+    name: '功德点灯',
+    description: '按顺序点亮莲花灯！',
+    duration: 25,
     powerCost: 10
   }
 };
@@ -599,7 +599,7 @@ export const wishTemplates = {
       title: '求实习offer！',
       description: '神明大人！我投了三十多份实习简历，一个回音都没有，我真的好焦虑啊...',
       category: '职场',
-      gameType: '堆叠',
+      gameType: '点灯',
       options: [
         { text: '投递加持', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '加点运气', description: '消耗神力8', powerCost: 8, effect: 'normal' },
@@ -678,7 +678,7 @@ export const wishTemplates = {
       title: '求找个好工作！',
       description: '神明大人！我不想再摆地摊了，求您让我找到一份稳定的工作吧！',
       category: '职场',
-      gameType: '堆叠',
+      gameType: '点灯',
       options: [
         { text: '帮他找工作', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '加点运气', description: '消耗神力8', powerCost: 8, effect: 'normal' },
@@ -1042,6 +1042,42 @@ export const trickyWishOutcomes = [
   { trigger: ['同事', '闭嘴', '安静'], result: '那位同事突发急性喉炎失声两周，但养病期间把所有工作都甩给来做。' },
   { trigger: ['陪父母', '回家', '亲情'], result: '被公司裁员，打包回老家住了半年，每天被亲妈嫌碍事、催相亲。' }
 ];
+
+// 连锁事件：成功完成愿望后 30% 概率触发
+// 每条事件有"涟漪角色"和"涟漪结果"
+export const chainEvents = {
+  liMing: {
+    success: [
+      { ripple: 'liMing爸', text: '李明的爸爸今天来庙里加香了，说儿子终于不让他操心。', incense: 25, scope: 'self' },
+      { ripple: 'liMing妈', text: '李明妈把好消息发到了亲戚群，三舅父也跑来上香求保佑。', incense: 30, scope: 'self' },
+      { ripple: 'chenJuan', text: '陈娟在朋友圈给李明点了赞："学弟好棒！"——故事开始有内味儿了。', incense: 15, scope: 'cross', target: 'chenJuan', happinessChange: 5 },
+      { ripple: 'wangWu', text: '王五看到李明四六级过了，也来上香："让我也争口气！"', incense: 10, scope: 'cross', target: 'wangWu', happinessChange: 3 }
+    ],
+    fail: [
+      { ripple: 'liMing妈', text: '李明妈打来电话："不就过个考试吗"，李明摔了门。', incense: -5, scope: 'self', happinessChange: -5 }
+    ]
+  },
+  wangWu: {
+    success: [
+      { ripple: 'wangWu妻', text: '王五拿到 offer 那天，老婆给庙里送了一面锦旗。', incense: 30, scope: 'self' },
+      { ripple: 'wangWu子', text: '王五给儿子买了新书包，儿子说"长大要做和神仙一样的人"。', incense: 25, scope: 'self' },
+      { ripple: 'liMing', text: '李明听说王五创业成功，也想试试副业，来庙里求灵感。', incense: 15, scope: 'cross', target: 'liMing', happinessChange: 5 }
+    ],
+    fail: [
+      { ripple: 'wangWu', text: '王五在地铁站发呆了一下午，把简历又改了一遍。', incense: 0, scope: 'self' }
+    ]
+  },
+  chenJuan: {
+    success: [
+      { ripple: 'chenJuan妈', text: '陈娟妈终于停了三天没催婚，全家清静。', incense: 20, scope: 'self' },
+      { ripple: 'chenJuan闺蜜', text: '陈娟闺蜜在朋友圈秀她：终于不是单身狗了！', incense: 15, scope: 'self' },
+      { ripple: 'liMing', text: '李明在朋友圈底下评论："学姐恭喜！"两人加了微信。', incense: 18, scope: 'cross', target: 'liMing', happinessChange: 5, link: 'liMing-chenJuan' }
+    ],
+    fail: [
+      { ripple: 'chenJuan', text: '陈娟回家把酒喝光了，第二天还要早起加班。', incense: 0, scope: 'self', happinessChange: -3 }
+    ]
+  }
+};
 
 // 通用兜底
 export const genericTrickyOutcomes = [

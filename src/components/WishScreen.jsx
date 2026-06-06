@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import WishCard from './WishCard';
 import MiniGameScreen from './MiniGameScreen';
-import { wishTemplates, trickyWishOutcomes, genericTrickyOutcomes, godMessages } from '../data/gameData';
+import { wishTemplates, trickyWishOutcomes, genericTrickyOutcomes, godMessages, chainEvents } from '../data/gameData';
+import haptic from '../utils/haptic';
 import './WishScreen.css';
 
 const WishScreen = () => {
@@ -74,6 +75,7 @@ const WishScreen = () => {
     }
     // 8% 概率触发"神一阵鬼一阵"
     if (Math.random() < 0.08) {
+      haptic.spooky();
       const text = `${wish.title} ${wish.description}`;
       const matched = trickyWishOutcomes.find(o => o.trigger.some(t => text.includes(t)));
       const outcome = matched ? matched.result : genericTrickyOutcomes[Math.floor(Math.random() * genericTrickyOutcomes.length)];
@@ -186,6 +188,27 @@ const WishScreen = () => {
         });
       }
 
+      // 100% 触发神仙私聊（成功 = 鼓励/夸赞，失败 = 安慰）
+      // 类别匹配：学业→城隍，姻缘→月老，职场→财神，其他→土地公
+      const categoryGod = {
+        '学业': 'chenghuang',
+        '姻缘': 'yuelao',
+        '职场': 'caishen',
+        '财运': 'caishen',
+        '健康': 'zaowang',
+      }[wish.category] || 'tudigong';
+
+      const privateMsgPool = result.success ? godMessages.success : godMessages.fail;
+      // 找匹配该神仙的，没有就随便挑
+      const matched = privateMsgPool.filter(m => m.godId === categoryGod);
+      const pickedPrivate = (matched.length > 0 ? matched : privateMsgPool)[Math.floor(Math.random() * (matched.length > 0 ? matched.length : privateMsgPool.length))];
+      const privateMsg = pickedPrivate ? {
+        ...pickedPrivate,
+        id: `private_${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString(),
+        read: false
+      } : null;
+
       return {
         ...prev,
         characters: newCharacters,
@@ -198,6 +221,8 @@ const WishScreen = () => {
         totalScore: Math.max(0, (prev.totalScore || 0) + (result.success ? 15 : -3)),
         groupMessages: [...(prev.groupMessages || []), ...newGroupMsgs],
         groupUnreadCount: (prev.groupUnreadCount || 0) + groupCount,
+        godMessagesQueue: privateMsg ? [...prev.godMessagesQueue, privateMsg] : prev.godMessagesQueue,
+        unreadCount: privateMsg ? (prev.unreadCount || 0) + 1 : prev.unreadCount,
         divineAttributes: {
           ...prev.divineAttributes,
           mercy: result.success ? Math.min(100, prev.divineAttributes.mercy + 10) : prev.divineAttributes.mercy,
@@ -205,6 +230,41 @@ const WishScreen = () => {
         }
       };
     });
+
+    // 蝴蝶效应：30% 概率触发连锁事件
+    if (Math.random() < 0.3) {
+      const pool = chainEvents[wish.characterId]?.[result.success ? 'success' : 'fail'];
+      if (pool && pool.length > 0) {
+        const ev = pool[Math.floor(Math.random() * pool.length)];
+        setTimeout(() => {
+          haptic.success();
+          setGameState(prev => {
+            const updates = {
+              ...prev,
+              incense: Math.max(0, prev.incense + (ev.incense || 0)),
+              moments: [{
+                id: `chain_${Date.now()}`,
+                characterId: ev.scope === 'cross' ? ev.target : wish.characterId,
+                content: `🦋 ${ev.text}`,
+                timestamp: new Date().toLocaleTimeString(),
+                isChain: true
+              }, ...prev.moments]
+            };
+            // 跨角色：也调整对应角色幸福度
+            if (ev.scope === 'cross' && ev.target && prev.characters[ev.target]) {
+              updates.characters = {
+                ...prev.characters,
+                [ev.target]: {
+                  ...prev.characters[ev.target],
+                  happiness: Math.max(0, Math.min(100, prev.characters[ev.target].happiness + (ev.happinessChange || 0)))
+                }
+              };
+            }
+            return updates;
+          });
+        }, 1500);
+      }
+    }
 
     // 显示结算面板
     setLastResult({
