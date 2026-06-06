@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-ssr/
+
+# vite cache
+.vite/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+*.local
+.vscode/
+.idea/
+
+# claude code
+.claude/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env
+.env.local
+.env.*.local

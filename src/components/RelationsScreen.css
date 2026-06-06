@@ -1,0 +1,167 @@
+.relations-screen {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.relation-section {
+  margin-bottom: 24px;
+}
+
+.relation-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-left: 8px;
+}
+
+.character-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.character-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.char-avatar {
+  font-size: 48px;
+}
+
+.char-info {
+  flex: 1;
+}
+
+.char-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.char-identity {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.happiness-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.happiness-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(61, 48, 40, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.happiness-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6b8e6b, #81c784);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.happiness-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.gods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.god-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+}
+
+.god-item .god-avatar {
+  font-size: 36px;
+}
+
+.god-info {
+  flex: 1;
+}
+
+.god-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.god-personality {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.god-status {
+  font-size: 12px;
+  color: #6b8e6b;
+  background: rgba(107, 142, 107, 0.1);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.storyline-progress {
+  padding: 16px;
+}
+
+.story-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.story-item:last-child {
+  border-bottom: none;
+}
+
+.story-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.story-avatar {
+  font-size: 28px;
+}
+
+.story-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.story-status {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.story-events {
+  padding-left: 38px;
+}
+
+.story-event {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.story-event:last-child {
+  margin-bottom: 0;
+}
