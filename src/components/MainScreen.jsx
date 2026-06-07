@@ -2,11 +2,14 @@ import React, { useState, useRef } from 'react';
 import { godChatStarters } from '../data/gameData';
 import { useGame } from '../context/GameContext';
 import haptic from '../utils/haptic';
+import { FloatingClouds, GodUnlockCutscene } from './VFX';
+import CausalSky from './CausalSky';
 import StartScreen from './StartScreen';
 import WishScreen from './WishScreen';
 import ResultScreen from './ResultScreen';
 import ObservationScreen from './ObservationScreen';
 import EndScreen from './EndScreen';
+import FinaleScreen from './FinaleScreen';
 import Navigation from './Navigation';
 import ResourceBar from './ResourceBar';
 import MessagePopup from './MessagePopup';
@@ -37,6 +40,8 @@ const MainScreen = () => {
         return <ResultScreen />;
       case 'observation':
         return <ObservationScreen />;
+      case 'finale':
+        return <FinaleScreen />;
       case 'end':
         return <EndScreen />;
       default:
@@ -69,6 +74,14 @@ const MainScreen = () => {
     setChatCameFromList(false);
   };
 
+  if (gameState.phase === 'finale') {
+    return (
+      <div className="main-screen">
+        <FinaleScreen />
+      </div>
+    );
+  }
+
   if (gameState.phase === 'start' || gameState.phase === 'end') {
     return (
       <div className="main-screen">
@@ -81,6 +94,7 @@ const MainScreen = () => {
   return (
     <div className="main-screen">
       <ResourceBar onOpenMessages={handleOpenMessages} />
+      <FloatingClouds />
       <MessageNotification />
       
       {currentTab === 'temple' && renderPhase()}
@@ -108,6 +122,32 @@ const MainScreen = () => {
           godId={selectedGod}
           onClose={handleClosePrivateChat}
           cameFromList={chatCameFromList}
+        />
+      )}
+
+      {gameState.pendingUnlock && (
+        <GodUnlockCutscene
+          god={gameState.pendingUnlock}
+          onDone={() => {
+            haptic.levelup();
+            haptic.shake('heavy');
+            setGameState(prev => ({
+              ...prev,
+              pendingUnlock: null,
+              godMessagesQueue: [...prev.godMessagesQueue, {
+                id: `welcome_unlock_${Date.now()}`,
+                godId: gameState.pendingUnlock.id,
+                message: `${gameState.godName || '小神'}！终于见到你，听同僚们经常夸你呢！`,
+                options: [
+                  { text: '欢迎欢迎！', result: { incense: 15, reply: '哈哈，多多关照。' } },
+                  { text: '相互照应', result: { incense: 8, reply: '好的~' } }
+                ],
+                timestamp: new Date().toLocaleTimeString(),
+                read: false
+              }],
+              unreadCount: (prev.unreadCount || 0) + 1
+            }));
+          }}
         />
       )}
     </div>
@@ -508,6 +548,7 @@ const DivineStatusScreen = () => {
 const RelationsScreen = ({ onJumpToMoments }) => {
   const { gameState } = useGame();
   const [expandedChar, setExpandedChar] = useState(null);
+  const [showSky, setShowSky] = useState(false);
   const characters = Object.values(gameState.characters);
   const gods = Object.values(gameState.gods).filter(g => g.unlocked);
   const processedByChar = {};
@@ -531,7 +572,7 @@ const RelationsScreen = ({ onJumpToMoments }) => {
               display: 'block',
               width: '100%',
               padding: '12px 16px',
-              margin: '8px 0 14px',
+              margin: '8px 0 10px',
               background: 'linear-gradient(135deg, #d4a574, #c0905a)',
               color: 'white',
               border: 'none',
@@ -545,6 +586,29 @@ const RelationsScreen = ({ onJumpToMoments }) => {
             📱 看看我养的人类怎样了 →
           </button>
         )}
+
+        <button
+          onClick={() => { haptic.medium(); setShowSky(true); }}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: '14px 16px',
+            margin: '0 0 14px',
+            background: 'linear-gradient(135deg, #1a0e3e, #4a2c5e)',
+            color: '#ffd700',
+            border: '1px solid #ffd700',
+            borderRadius: '14px',
+            fontSize: '14px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            letterSpacing: '4px',
+            boxShadow: '0 3px 12px rgba(255, 215, 0, 0.3)'
+          }}
+        >
+          ✨ 因果天网 · 查看剧情星图 ✨
+        </button>
+
+        {showSky && <CausalSky onClose={() => setShowSky(false)} />}
 
         <div className="character-grid">
           {characters.map(char => {

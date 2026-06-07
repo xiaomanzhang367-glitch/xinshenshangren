@@ -23,7 +23,12 @@ export const useGameState = () => {
     godFriendship: { caishen: 0, tudigong: 0, chenghuang: 0, yuelao: 0, zaowang: 0 },
     redPackets: [], // 神仙红包队列
     lastReliefAt: 0,
+    lastDailyAt: 0,
+    lastMilestone: 0,
+    lowResourceSince: null,
     godName: '',
+    day: 1,
+    maxDays: 7,
     divineAttributes: {
       order: 50,
       mercy: 50,
@@ -54,40 +59,117 @@ export const useGameState = () => {
     return () => clearInterval(tick);
   }, []);
 
-  // 资源死锁救济：香火≤5 且 神力≤5 时，关系最好的神仙发红包
+  // 隐藏神仙解锁监听
   useEffect(() => {
-    const checkRelief = setInterval(() => {
+    const score = gameState.totalScore || 0;
+    const helpCounts = {};
+    (gameState.processedWishes || []).forEach(w => {
+      helpCounts[w.characterId] = (helpCounts[w.characterId] || 0) + 1;
+    });
+    const liMingHelps = helpCounts.liMing || 0;
+    const wangWuHelps = helpCounts.wangWu || 0;
+    const chenJuanHelps = helpCounts.chenJuan || 0;
+
+    // 天后娘娘：功德 >= 40 且 帮陈娟 >= 2 次
+    if (!gameState.gods.tianhou.unlocked && score >= 40 && chenJuanHelps >= 2) {
+      setGameState(prev => ({
+        ...prev,
+        gods: { ...prev.gods, tianhou: { ...prev.gods.tianhou, unlocked: true, chatActive: true } },
+        pendingUnlock: prev.gods.tianhou
+      }));
+    }
+
+    // 关公：功德 >= 80 且 帮王五 >= 3 次
+    if (!gameState.gods.guanqing.unlocked && score >= 80 && wangWuHelps >= 3) {
+      setGameState(prev => ({
+        ...prev,
+        gods: { ...prev.gods, guanqing: { ...prev.gods.guanqing, unlocked: true, chatActive: true } },
+        pendingUnlock: prev.gods.guanqing
+      }));
+    }
+  }, [gameState.totalScore, gameState.processedWishes, gameState.gods.tianhou.unlocked, gameState.gods.guanqing.unlocked]);
+
+  // 红包系统 - 5 种场景
+  useEffect(() => {
+    const checkRedPackets = setInterval(() => {
       setGameState(prev => {
         if (prev.phase !== 'wish') return prev;
-        if (prev.incense > 5 || prev.power > 5) return prev;
-        // 一天只能触发一次（24小时 = 86400000ms，演示用5分钟）
-        if (Date.now() - prev.lastReliefAt < 5 * 60 * 1000) return prev;
+        const now = Date.now();
+        const updates = {};
 
-        // 找关系最好的神仙
-        const friends = Object.entries(prev.godFriendship)
-          .filter(([id]) => prev.gods[id]?.unlocked)
-          .sort((a, b) => b[1] - a[1]);
-        const [bestGodId] = friends[0] || ['tudigong'];
-        const god = prev.gods[bestGodId];
+        // 场景1: 救济红包 - 香火<15或神力<15，持续超过30秒
+        const isLowResource = prev.incense < 15 || prev.power < 15;
+        if (isLowResource && !prev.lowResourceSince) {
+          updates.lowResourceSince = now;
+        } else if (!isLowResource && prev.lowResourceSince) {
+          updates.lowResourceSince = null;
+        } else if (isLowResource && prev.lowResourceSince && now - prev.lowResourceSince > 30000) {
+          if (now - (prev.lastReliefAt || 0) > 3 * 60 * 1000) {
+            const friends = Object.entries(prev.godFriendship || {})
+              .filter(([id]) => prev.gods[id]?.unlocked)
+              .sort((a, b) => b[1] - a[1]);
+            const [bestGodId] = friends[0] || ['tudigong'];
+            const god = prev.gods[bestGodId];
+            const redPacket = {
+              id: `relief_${now}`,
+              godId: bestGodId,
+              isRedPacket: true,
+              type: 'relief',
+              amount: { incense: 25, power: 20 },
+              message: `小神别愁，${god.name}给你发个救济包，先撑着！`,
+              timestamp: new Date().toLocaleTimeString(),
+              read: false
+            };
+            updates.godMessagesQueue = [...prev.godMessagesQueue, redPacket];
+            updates.unreadCount = (prev.unreadCount || 0) + 1;
+            updates.lastReliefAt = now;
+            updates.lowResourceSince = null;
+          }
+        }
 
-        const redPacketMsg = {
-          id: `redpacket_${Date.now()}`,
-          godId: bestGodId,
-          isRedPacket: true,
-          amount: { incense: 25, power: 25 },
-          message: `小神别愁，${god.name}给你发个红包，先撑着！`,
-          timestamp: new Date().toLocaleTimeString(),
-          read: false
-        };
-        return {
-          ...prev,
-          godMessagesQueue: [...prev.godMessagesQueue, redPacketMsg],
-          unreadCount: prev.unreadCount + 1,
-          lastReliefAt: Date.now()
-        };
+        // 场景2: 每日打卡红包 - 进入游戏第一次（每60分钟一次）
+        if (!prev.lastDailyAt || now - prev.lastDailyAt > 60 * 60 * 1000) {
+          const dailyPacket = {
+            id: `daily_${now}`,
+            godId: 'tudigong',
+            isRedPacket: true,
+            type: 'daily',
+            amount: { incense: 15, power: 10 },
+            message: `早安红包！土地公给你的开工小红包~`,
+            timestamp: new Date().toLocaleTimeString(),
+            read: false
+          };
+          updates.godMessagesQueue = [...(updates.godMessagesQueue || prev.godMessagesQueue), dailyPacket];
+          updates.unreadCount = (updates.unreadCount ?? (prev.unreadCount || 0)) + 1;
+          updates.lastDailyAt = now;
+        }
+
+        // 场景3: 累计触发 - 每处理 5 个愿望发一个节日红包
+        const processed = prev.wishesProcessed || 0;
+        const milestone = Math.floor(processed / 5);
+        if (milestone > (prev.lastMilestone || 0)) {
+          const allGods = ['caishen', 'tudigong', 'chenghuang', 'yuelao', 'zaowang'];
+          const randGod = allGods[Math.floor(Math.random() * allGods.length)];
+          const milestonePacket = {
+            id: `milestone_${now}`,
+            godId: randGod,
+            isRedPacket: true,
+            type: 'milestone',
+            amount: { incense: 30, power: 25 },
+            message: `🎊 已经帮 ${milestone * 5} 个凡人了！集体红包送你！`,
+            timestamp: new Date().toLocaleTimeString(),
+            read: false
+          };
+          updates.godMessagesQueue = [...(updates.godMessagesQueue || prev.godMessagesQueue), milestonePacket];
+          updates.unreadCount = (updates.unreadCount ?? (prev.unreadCount || 0)) + 1;
+          updates.lastMilestone = milestone;
+        }
+
+        if (Object.keys(updates).length === 0) return prev;
+        return { ...prev, ...updates };
       });
-    }, 10000);
-    return () => clearInterval(checkRelief);
+    }, 8000);
+    return () => clearInterval(checkRedPackets);
   }, []);
 
   const generateGodMessage = useCallback((triggerType, context = {}) => {

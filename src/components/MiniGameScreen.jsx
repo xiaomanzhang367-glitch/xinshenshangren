@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import { miniGames } from '../data/gameData';
 import haptic from '../utils/haptic';
+import { PerfectBurst, Fireworks } from './VFX';
 import './MiniGameScreen.css';
 
 const MiniGameScreen = ({ wish, onComplete }) => {
@@ -13,7 +14,19 @@ const MiniGameScreen = ({ wish, onComplete }) => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(gameConfig.duration);
   const [gameEnded, setGameEnded] = useState(false);
+  const [showBurst, setShowBurst] = useState(null);
+  const [showFireworks, setShowFireworks] = useState(false);
   const timerRef = useRef(null);
+
+  // 全局事件：PERFECT 命中时震屏 + 视觉爆炸
+  useEffect(() => {
+    const handler = (e) => {
+      setShowBurst(e.detail || { text: '✨ PERFECT ✨', color: '#ffd700' });
+      haptic.shake('heavy');
+    };
+    window.addEventListener('vfx:perfect', handler);
+    return () => window.removeEventListener('vfx:perfect', handler);
+  }, []);
 
   const startGame = () => {
     setGameStarted(true);
@@ -143,7 +156,18 @@ const MiniGameScreen = ({ wish, onComplete }) => {
       {gameType === '点灯' && <LightLampGame score={score} setScore={setScore} gameEnded={gameEnded} onEarlyWin={handleEarlyWin} />}
 
       {gameEnded && (
-        <GameResult score={score} onComplete={handleComplete} />
+        <>
+          {score >= 60 && <Fireworks onDone={() => setShowFireworks(false)} />}
+          <GameResult score={score} onComplete={handleComplete} />
+        </>
+      )}
+
+      {showBurst && (
+        <PerfectBurst
+          text={showBurst.text}
+          color={showBurst.color}
+          onDone={() => setShowBurst(null)}
+        />
       )}
     </div>
   );
@@ -456,6 +480,7 @@ const JumpGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
     if (power >= zone.start && power <= zone.end) {
       hitType = 'perfect';
       haptic.heavy();
+      window.dispatchEvent(new CustomEvent('vfx:perfect', { detail: { text: '✨ PERFECT ✨', color: '#ffd700' } }));
     } else if (power >= zone.start - 8 && power <= zone.end + 8) {
       hitType = 'good';
       haptic.medium();

@@ -73,8 +73,8 @@ const WishScreen = () => {
       alert('神力不足！点击神力旁边的+号兑换');
       return;
     }
-    // 8% 概率触发"神一阵鬼一阵"
-    if (Math.random() < 0.08) {
+    // 15% 概率触发"神一阵鬼一阵"
+    if (Math.random() < 0.15) {
       haptic.spooky();
       const text = `${wish.title} ${wish.description}`;
       const matched = trickyWishOutcomes.find(o => o.trigger.some(t => text.includes(t)));
@@ -221,6 +221,9 @@ const WishScreen = () => {
         totalScore: Math.max(0, (prev.totalScore || 0) + (result.success ? 15 : -3)),
         groupMessages: [...(prev.groupMessages || []), ...newGroupMsgs],
         groupUnreadCount: (prev.groupUnreadCount || 0) + groupCount,
+        // 每处理 3 个愿望算 1 天，到 7 天触发结局
+        day: Math.min((prev.maxDays || 7), Math.floor(((prev.wishesProcessed || 0) + 1) / 3) + 1),
+        phase: (((prev.wishesProcessed || 0) + 1) >= 21) ? 'finale' : prev.phase,
         godMessagesQueue: privateMsg ? [...prev.godMessagesQueue, privateMsg] : prev.godMessagesQueue,
         unreadCount: privateMsg ? (prev.unreadCount || 0) + 1 : prev.unreadCount,
         divineAttributes: {
@@ -372,29 +375,107 @@ const WishScreen = () => {
   );
 };
 
-const TrickyEventOverlay = ({ event, onConfirm }) => (
-  <div className="wish-detail-overlay" style={{ background: 'rgba(80, 30, 90, 0.7)' }}>
-    <div className="wish-detail card animate-slide-in tricky-event" onClick={e => e.stopPropagation()}>
-      <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
-        <div style={{ fontSize: '54px', animation: 'shake 0.5s ease' }}>🎲</div>
-        <h3 style={{ background: 'linear-gradient(90deg,#8e44ad,#c0392b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '8px 0', fontSize: '22px' }}>
-          ⚡ 神仙今天有点皮…
-        </h3>
-        <div style={{ fontSize: '12px', color: '#999' }}>"神一阵 · 鬼一阵" 调剂型还愿</div>
+// 小红书爆贴风的彩蛋
+const RANDOM_TITLES = [
+  '兄弟们我真的服了…',
+  '求神仙小心愿望，神仙：好嘞您嘞！',
+  '玄学还得是这一届的神，我服',
+  '哈哈哈我笑死求神居然成真了',
+  '求神居然真的有用？但是…',
+  '神仙说话算话但是太字面意思了'
+];
+const RANDOM_TAGS = ['#神仙也会皮', '#求神记', '#玄学翻车', '#神明在听', '#凡人破防', '#字面意思'];
+const RANDOM_COMMENTS = [
+  { name: '匿名神友', text: '这不就是字面意思吗哈哈哈' },
+  { name: 'i人退散', text: '求神仙翻牌我！我也想要这种待遇' },
+  { name: '社畜本社', text: '同样被神字面解读过的报到 🤝' },
+  { name: '吃瓜群众', text: '楼主笑死我了 求更新' },
+  { name: '小神信徒', text: '所以神仙真的存在！只是有点皮…' },
+  { name: '玄学博主', text: '记下了，下次许愿一定写清楚' },
+  { name: '路人甲', text: '我的天，跟我表妹经历一模一样' },
+  { name: 'KPI 杀手', text: '哈哈哈神仙也卷' },
+  { name: '佛系青年', text: '不愧是新一届的神，作风清奇' },
+  { name: '万事亨通', text: '楼主请问怎么联系到这位神仙？' }
+];
+const RANDOM_IMAGES = ['🤡', '😭', '🙃', '🥲', '😶‍🌫️', '👻', '🫠', '🤯', '😵‍💫', '🥹'];
+
+const TrickyEventOverlay = ({ event, onConfirm }) => {
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [comments] = useState(() => {
+    const shuffled = [...RANDOM_COMMENTS].sort(() => Math.random() - 0.5).slice(0, 4);
+    return shuffled;
+  });
+  const title = RANDOM_TITLES[Math.floor(Math.random() * RANDOM_TITLES.length)];
+  const tags = [...RANDOM_TAGS].sort(() => Math.random() - 0.5).slice(0, 3);
+  const img = RANDOM_IMAGES[Math.floor(Math.random() * RANDOM_IMAGES.length)];
+  const likes = Math.floor(Math.random() * 4000) + 800;
+  const savesCount = Math.floor(likes / 4);
+
+  React.useEffect(() => {
+    haptic.spooky();
+    haptic.shake('heavy');
+  }, []);
+
+  return (
+    <div className="xhs-overlay">
+      <div className="xhs-card" onClick={e => e.stopPropagation()}>
+        {/* 顶部小红书 fake 导航 */}
+        <div className="xhs-topbar">
+          <span>📱 求神记 · 玄学小红书</span>
+          <span style={{ fontSize: 11, color: '#999' }}>🔥 神仙发威了</span>
+        </div>
+
+        {/* 大表情图 */}
+        <div className="xhs-image">
+          <div className="xhs-image-emoji">{img}</div>
+          <div className="xhs-image-text">{tags.join(' ')}</div>
+        </div>
+
+        {/* 标题+正文 */}
+        <div className="xhs-content">
+          <h3 className="xhs-title">🔥 {title}</h3>
+          <p className="xhs-body">"{event.outcome}"</p>
+
+          <div className="xhs-author">
+            <span>👤 匿名凡人 · 2 分钟前</span>
+          </div>
+
+          {/* 互动栏 */}
+          <div className="xhs-actions">
+            <button className={`xhs-action ${liked ? 'on' : ''}`} onClick={() => { haptic.light(); setLiked(!liked); }}>
+              ❤️ {liked ? likes + 1 : likes}
+            </button>
+            <button className={`xhs-action ${saved ? 'on' : ''}`} onClick={() => { haptic.light(); setSaved(!saved); }}>
+              🔖 {saved ? savesCount + 1 : savesCount}
+            </button>
+            <button className="xhs-action">💬 {comments.length}</button>
+            <button className="xhs-action">📤 转发</button>
+          </div>
+
+          {/* 评论区 */}
+          <div className="xhs-comments">
+            <div className="xhs-comments-title">💬 神友热议</div>
+            {comments.map((c, i) => (
+              <div key={i} className="xhs-comment">
+                <span className="xhs-comment-name">{c.name}：</span>
+                <span className="xhs-comment-text">{c.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="xhs-reward">
+            🧧 神仙补偿：香火 +30 · 神力消耗减半 · 你的「调剂型神明」成就 +1
+          </div>
+
+          <button className="xhs-close-btn" onClick={onConfirm}>
+            哭笑不得，下一个 →
+          </button>
+        </div>
       </div>
-      <div style={{ background: 'rgba(142, 68, 173, 0.08)', padding: '16px', borderRadius: '12px', margin: '12px 0', lineHeight: 1.7, color: '#444', fontSize: '14px' }}>
-        <div style={{ fontSize: '12px', color: '#8e44ad', marginBottom: '6px' }}>📜 凡间真实反馈：</div>
-        "{event.outcome}"
-      </div>
-      <div style={{ textAlign: 'center', fontSize: '11px', color: '#888', margin: '8px 0' }}>
-        🧧 神仙给的补偿：香火 +30 · 神力消耗减半 · 解锁成就「调剂型神明」
-      </div>
-      <button className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} onClick={onConfirm}>
-        哭笑不得，下一个
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 const ResultOverlay = ({ data, onClose }) => {
   const { wish, character, result, momentText, incenseGain, powerCost, happinessChange } = data;

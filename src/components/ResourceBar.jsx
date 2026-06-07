@@ -1,11 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import haptic from '../utils/haptic';
+import { FloatingNumber } from './VFX';
 import './ResourceBar.css';
 
 const ResourceBar = ({ onOpenMessages }) => {
   const { gameState, setGameState } = useGame();
   const [showExchange, setShowExchange] = useState(false);
+  const [floats, setFloats] = useState([]);
+  const prevIncense = useRef(gameState.incense);
+  const prevPower = useRef(gameState.power);
+
+  useEffect(() => {
+    if (gameState.incense > prevIncense.current) {
+      const delta = gameState.incense - prevIncense.current;
+      const id = `f${Date.now()}_i`;
+      setFloats(f => [...f, { id, value: delta, color: '#ffd700', icon: '🔥', x: 20, y: 12 }]);
+    } else if (gameState.incense < prevIncense.current) {
+      const delta = gameState.incense - prevIncense.current;
+      const id = `f${Date.now()}_id`;
+      setFloats(f => [...f, { id, value: delta, color: '#e74c3c', icon: '🔥', x: 20, y: 12 }]);
+    }
+    prevIncense.current = gameState.incense;
+  }, [gameState.incense]);
+
+  useEffect(() => {
+    if (gameState.power > prevPower.current) {
+      const delta = gameState.power - prevPower.current;
+      const id = `f${Date.now()}_p`;
+      setFloats(f => [...f, { id, value: delta, color: '#ff9800', icon: '⚡', x: 50, y: 12 }]);
+    } else if (gameState.power < prevPower.current) {
+      const delta = gameState.power - prevPower.current;
+      const id = `f${Date.now()}_pd`;
+      setFloats(f => [...f, { id, value: delta, color: '#888', icon: '⚡', x: 50, y: 12 }]);
+    }
+    prevPower.current = gameState.power;
+  }, [gameState.power]);
 
   const exchangeOptions = [
     { incense: 5, power: 5, label: '小额兑换 1:1' },
@@ -60,6 +90,18 @@ const ResourceBar = ({ onOpenMessages }) => {
           )}
         </button>
       </div>
+
+      {floats.map(f => (
+        <FloatingNumber
+          key={f.id}
+          value={f.value}
+          color={f.color}
+          icon={f.icon}
+          x={f.x}
+          y={f.y}
+          onDone={() => setFloats(prev => prev.filter(x => x.id !== f.id))}
+        />
+      ))}
 
       {showExchange && (
         <div className="exchange-modal-overlay" onClick={() => setShowExchange(false)}>

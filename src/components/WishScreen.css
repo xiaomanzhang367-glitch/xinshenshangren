@@ -4,6 +4,182 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* 小红书爆贴风格 */
+.xhs-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.xhs-card {
+  width: 100%;
+  max-width: 400px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 16px;
+  animation: xhsBurst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes xhsBurst {
+  0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(1.05) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.xhs-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ff2442, #ff4a8c);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 16px 16px 0 0;
+}
+
+.xhs-image {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  padding: 32px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.xhs-image-emoji {
+  font-size: 96px;
+  animation: emojiWiggle 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes emojiWiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.xhs-image-text {
+  font-size: 13px;
+  color: #ff2442;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.xhs-content {
+  padding: 16px;
+}
+
+.xhs-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #1f1f1f;
+  line-height: 1.5;
+}
+
+.xhs-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+  background: #fff7e6;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-left: 3px solid #ff8800;
+  margin-bottom: 12px;
+}
+
+.xhs-author {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 14px;
+}
+
+.xhs-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 14px;
+}
+
+.xhs-action {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 10px;
+  transition: all 0.2s;
+}
+
+.xhs-action.on {
+  color: #ff2442;
+  font-weight: 700;
+  transform: scale(1.1);
+}
+
+.xhs-comments {
+  margin-bottom: 14px;
+}
+
+.xhs-comments-title {
+  font-size: 13px;
+  color: #ff2442;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.xhs-comment {
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+  line-height: 1.5;
+}
+
+.xhs-comment-name {
+  font-weight: 600;
+  color: #555;
+}
+
+.xhs-comment-text {
+  color: #333;
+}
+
+.xhs-reward {
+  background: linear-gradient(135deg, #fff8e1, #fff3c4);
+  border: 1px dashed #ffb800;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #b07700;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.xhs-close-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #ff2442, #ff4a8c);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 36, 66, 0.35);
+}
+
+.xhs-close-btn:hover {
+  transform: translateY(-2px);
+}
+
 .tricky-event {
   border: 2px solid #8e44ad !important;
   box-shadow: 0 0 30px rgba(142, 68, 173, 0.5) !important;

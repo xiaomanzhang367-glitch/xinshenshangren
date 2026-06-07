@@ -19,7 +19,17 @@ const safeVibrate = (pattern) => {
   }
 };
 
+// 屏幕震动假振动 - 给 body 加震屏 class 短时
+const shake = (intensity = 'medium') => {
+  const cls = `screen-shake-${intensity}`;
+  const body = document.body;
+  body.classList.add(cls);
+  setTimeout(() => body.classList.remove(cls), intensity === 'heavy' ? 600 : 400);
+};
+
 export const haptic = {
+  // 屏幕震动 - 任意时机都能调（视觉上的"伪振动"）
+  shake: (intensity = 'medium') => shake(intensity),
   // 轻触：UI 点击、翻页、按钮
   light: () => safeVibrate(20),
 
