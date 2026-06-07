@@ -270,22 +270,46 @@ const CatchGame = ({ score, setScore, gameEnded, onEarlyWin }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // 统一 Pointer 事件：触屏/鼠标都走这条
-  const handlePointer = (e) => {
+  // Touch + Pointer 双绑（兼容微信WebView），位置改 ref 不引起重渲染
+  const movePlayerRef = useRef(null);
+  movePlayerRef.current = (clientX) => {
     const rect = gameRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
-    if (clientX === undefined) return;
     const x = ((clientX - rect.left) / rect.width) * 100;
-    setPlayerPos(Math.max(10, Math.min(90, x)));
+    const clamped = Math.max(10, Math.min(90, x));
+    playerPosRef.current = clamped;
+    setPlayerPos(clamped);
   };
+
+  // 用原生事件监听器避免 React 合成事件在某些微信版本里被吞
+  useEffect(() => {
+    const el = gameRef.current;
+    if (!el) return;
+    const onTouch = (e) => {
+      const t = e.touches?.[0] || e.changedTouches?.[0];
+      if (t) movePlayerRef.current?.(t.clientX);
+    };
+    const onPointer = (e) => {
+      if (e.clientX !== undefined) movePlayerRef.current?.(e.clientX);
+    };
+    const onMouse = (e) => movePlayerRef.current?.(e.clientX);
+
+    el.addEventListener('touchstart', onTouch, { passive: true });
+    el.addEventListener('touchmove', onTouch, { passive: true });
+    el.addEventListener('pointermove', onPointer);
+    el.addEventListener('mousemove', onMouse);
+    return () => {
+      el.removeEventListener('touchstart', onTouch);
+      el.removeEventListener('touchmove', onTouch);
+      el.removeEventListener('pointermove', onPointer);
+      el.removeEventListener('mousemove', onMouse);
+    };
+  }, []);
 
   return (
     <div
       className="game-area"
       ref={gameRef}
-      onPointerMove={handlePointer}
-      onPointerDown={handlePointer}
       style={{ touchAction: 'none' }}
     >
       <div className="falling-items">

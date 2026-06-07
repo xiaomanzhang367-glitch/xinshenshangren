@@ -3,173 +3,425 @@ import { useGame } from '../context/GameContext';
 import haptic from '../utils/haptic';
 import './CausalSky.css';
 
-// 剧情节点定义 - 7 天 × 3 角色
+// 7天剧情节点 - 不再用屏幕%坐标，用相对位置（力导向布局会重新分布）
 const STORY_NODES = {
   liMing: [
-    { day: 1, x: 15, y: 50, title: '四六级考试', desc: '李明第三次考四六级' },
-    { day: 2, x: 28, y: 35, title: '论文答辩', desc: '差点延毕的瞬间' },
-    { day: 3, x: 42, y: 55, title: '互联网面试', desc: '人生第一份工作' },
-    { day: 4, x: 55, y: 40, title: '入职第一天', desc: '老板要求开摄像头' },
-    { day: 5, x: 68, y: 30, title: '相亲风波', desc: '妈安排相亲的对象' },
-    { day: 6, x: 80, y: 50, title: '感情走向', desc: '开始了一段感情' },
-    { day: 7, x: 92, y: 40, title: '人生定调', desc: '李明的终局' }
+    { day: 1, title: '四六级', desc: '李明的开端', importance: 1 },
+    { day: 2, title: '论文答辩', desc: '勉强毕业还是优秀', importance: 1 },
+    { day: 3, title: '求职岔路', desc: '互联网 / 体制 / 创业', importance: 2 },
+    { day: 4, title: '入职冲击', desc: '加班 / 摄像头', importance: 1 },
+    { day: 5, title: '暗恋开端', desc: '幸运数字看到了她', importance: 2 },
+    { day: 6, title: '感情走向', desc: '告白 / 错过', importance: 2 },
+    { day: 7, title: '终局', desc: '学霸 / 大厂 / 创业 / 体制 / 爱情', importance: 3 }
   ],
   wangWu: [
-    { day: 1, x: 15, y: 70, title: '失业三月', desc: '王五第一次面试机会' },
-    { day: 2, x: 30, y: 80, title: '不被裁员', desc: '公司裁员潮' },
-    { day: 3, x: 45, y: 70, title: '面馆开张', desc: '凑钱开了家小面馆' },
-    { day: 4, x: 58, y: 85, title: '资金周转', desc: '面馆进货资金不够' },
-    { day: 5, x: 72, y: 75, title: '老婆怀孕', desc: '突如其来的喜事' },
-    { day: 6, x: 82, y: 70, title: '生意爆火', desc: '抖音网红打卡' },
-    { day: 7, x: 92, y: 75, title: '老板归宿', desc: '王五的终局' }
+    { day: 1, title: '失业三月', desc: '王五的低谷', importance: 1 },
+    { day: 2, title: '面馆萌芽', desc: '小狐狸出现', importance: 2 },
+    { day: 3, title: '面馆开张', desc: '麻辣螺蛳粉面', importance: 1 },
+    { day: 4, title: '资金周转', desc: '投资 / 贷款 / 摆地摊', importance: 2 },
+    { day: 5, title: '老婆怀孕', desc: '生活突变', importance: 1 },
+    { day: 6, title: '生意定调', desc: '抖音爆火 / 平淡', importance: 2 },
+    { day: 7, title: '终局', desc: '老板 / 大厨 / 韭菜 / 团圆', importance: 3 }
   ],
   chenJuan: [
-    { day: 1, x: 15, y: 25, title: '别催婚啊', desc: '妈又安排了三个相亲' },
-    { day: 2, x: 28, y: 15, title: '相亲尴尬', desc: '希望今天的相亲不奇葩' },
-    { day: 3, x: 42, y: 25, title: '处对象', desc: '和男友处得怎么样' },
-    { day: 4, x: 55, y: 10, title: '工作压力', desc: '老板天天 PUA' },
-    { day: 5, x: 68, y: 20, title: '妈病重了', desc: '突发紧急情况' },
-    { day: 6, x: 82, y: 15, title: '人生抉择', desc: '辞职 or 升职' },
-    { day: 7, x: 92, y: 25, title: '自我觉醒', desc: '陈娟的终局' }
+    { day: 1, title: '催婚地狱', desc: '陈娟的起点', importance: 1 },
+    { day: 2, title: '相亲奇遇', desc: '可能遇见李明', importance: 2 },
+    { day: 3, title: '外婆回信', desc: '玄学事件', importance: 2 },
+    { day: 4, title: '工作压力', desc: 'PUA / 升职', importance: 1 },
+    { day: 5, title: '妈病重了', desc: '关键抉择', importance: 3 },
+    { day: 6, title: '自我抉择', desc: '辞职 / 升职 / 觉醒', importance: 2 },
+    { day: 7, title: '终局', desc: '嫁人 / 觉醒 / 单身贵族', importance: 3 }
   ]
 };
+
+const CHAR_COLOR = {
+  liMing: { r: 100, g: 200, b: 255 },
+  wangWu: { r: 255, g: 130, b: 100 },
+  chenJuan: { r: 255, g: 200, b: 100 }
+};
+
+const CHAR_NAME = { liMing: '李明', wangWu: '王五', chenJuan: '陈娟' };
 
 const CausalSky = ({ onClose }) => {
   const { gameState } = useGame();
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [scale, setScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
 
-  // 把已处理愿望按角色+天数索引
   const triggeredMap = {};
-  (gameState.processedWishes || []).forEach((w, i) => {
-    if (!triggeredMap[w.characterId]) triggeredMap[w.characterId] = [];
-    triggeredMap[w.characterId].push(i);
+  (gameState.processedWishes || []).forEach(w => {
+    if (!triggeredMap[w.characterId]) triggeredMap[w.characterId] = 0;
+    triggeredMap[w.characterId]++;
   });
 
-  // 粒子背景动画
+  // 物理状态 - useRef 避免重渲染
+  const physics = useRef(null);
+  const transformRef = useRef({ scale: 1, panX: 0, panY: 0 });
+
+  // 初始化节点物理状态（力导向起点）
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let raf;
-    const resize = () => {
-      canvas.width = canvas.offsetWidth * 2;
-      canvas.height = canvas.offsetHeight * 2;
-      ctx.scale(2, 2);
-    };
-    resize();
 
-    const particles = Array.from({ length: 80 }, () => ({
-      x: Math.random() * canvas.offsetWidth,
-      y: Math.random() * canvas.offsetHeight,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.5 + 0.5,
-      a: Math.random() * 0.5 + 0.3
-    }));
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    const CX = W / 2, CY = H / 2;
 
-    const tick = () => {
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-      // 粒子
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.offsetWidth) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.offsetHeight) p.vy *= -1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 215, 0, ${p.a})`;
-        ctx.fill();
+    const nodes = [];
+    const links = [];
+
+    // 中心"神格"枢纽节点
+    nodes.push({
+      id: 'center',
+      x: CX, y: CY, vx: 0, vy: 0,
+      r: 8, color: { r: 255, g: 215, b: 100 },
+      label: '神格中心', isLit: true, isHub: true,
+      meta: { title: '神格中心', desc: '你即是因果之源' }
+    });
+
+    Object.entries(STORY_NODES).forEach(([charId, chapters], chIdx) => {
+      const angle0 = chIdx * (Math.PI * 2 / 3);
+      chapters.forEach((node, dayIdx) => {
+        const ringR = 80 + dayIdx * 50;
+        const angle = angle0 + (Math.random() - 0.5) * 0.4 + dayIdx * 0.15;
+        const isLit = dayIdx < (triggeredMap[charId] || 0);
+        const isCurrent = dayIdx === (triggeredMap[charId] || 0);
+        nodes.push({
+          id: `${charId}-${dayIdx}`,
+          x: CX + Math.cos(angle) * ringR,
+          y: CY + Math.sin(angle) * ringR,
+          vx: 0, vy: 0,
+          r: 4 + node.importance * 2,
+          color: CHAR_COLOR[charId],
+          label: `Day${node.day} ${CHAR_NAME[charId]}`,
+          isLit, isCurrent, isHub: false,
+          charId, dayIdx,
+          meta: { ...node, charId, charName: CHAR_NAME[charId] }
+        });
+        // 连接：与前一天节点
+        if (dayIdx === 0) {
+          links.push({ a: 0, b: nodes.length - 1, isLit });
+        } else {
+          links.push({ a: nodes.length - 2, b: nodes.length - 1, isLit });
+        }
       });
-      // 互相连线（近距离）
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 80) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 215, 0, ${(1 - dist / 80) * 0.15})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
+    });
+
+    // 跨角色潜在连接（虚连）
+    const charIds = Object.keys(STORY_NODES);
+    for (let i = 0; i < charIds.length; i++) {
+      for (let j = i + 1; j < charIds.length; j++) {
+        const a = nodes.findIndex(n => n.charId === charIds[i] && n.dayIdx === 5);
+        const b = nodes.findIndex(n => n.charId === charIds[j] && n.dayIdx === 5);
+        if (a > 0 && b > 0) {
+          links.push({ a, b, isLit: nodes[a].isLit && nodes[b].isLit, cross: true });
         }
       }
+    }
+
+    physics.current = { nodes, links, w: W, h: H, cx: CX, cy: CY };
+
+    // 启动动画循环
+    let raf;
+    const tick = () => {
+      const p = physics.current;
+      if (!p) return;
+      // 力导向更新
+      for (let i = 0; i < p.nodes.length; i++) {
+        const n = p.nodes[i];
+        if (n.isHub) continue;
+        // 弹簧到原始位置（避免漂走）
+        const dx = p.cx - n.x;
+        const dy = p.cy - n.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const targetDist = 80 + n.dayIdx * 50;
+        const diff = dist - targetDist;
+        n.vx += (dx / dist) * diff * 0.0008;
+        n.vy += (dy / dist) * diff * 0.0008;
+        // 节点之间斥力
+        for (let j = 0; j < p.nodes.length; j++) {
+          if (i === j) continue;
+          const m = p.nodes[j];
+          const ddx = n.x - m.x;
+          const ddy = n.y - m.y;
+          const dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
+          if (dd < 50) {
+            const force = (50 - dd) * 0.005;
+            n.vx += (ddx / dd) * force;
+            n.vy += (ddy / dd) * force;
+          }
+        }
+        // 阻尼
+        n.vx *= 0.92;
+        n.vy *= 0.92;
+        n.x += n.vx;
+        n.y += n.vy;
+      }
+      drawScene();
       raf = requestAnimationFrame(tick);
     };
     tick();
-    const handleResize = () => resize();
-    window.addEventListener('resize', handleResize);
+
+    return () => cancelAnimationFrame(raf);
+  }, [gameState.processedWishes]);
+
+  const drawScene = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const p = physics.current;
+    if (!p) return;
+    const ctx = canvas.getContext('2d');
+
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // 应用 pan/zoom
+    const { scale: sc, panX, panY } = transformRef.current;
+    ctx.save();
+    ctx.translate(panX, panY);
+    ctx.scale(sc, sc);
+
+    // 背景星尘
+    const t = Date.now() / 1000;
+    if (!p.stars) {
+      p.stars = Array.from({ length: 200 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.3,
+        a: Math.random() * 0.5 + 0.2,
+        phase: Math.random() * Math.PI * 2
+      }));
+    }
+    p.stars.forEach(s => {
+      const pulse = (Math.sin(t * 0.8 + s.phase) + 1) * 0.5;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${s.a * pulse})`;
+      ctx.fill();
+    });
+
+    // 连线（呼吸）
+    p.links.forEach((link) => {
+      const a = p.nodes[link.a];
+      const b = p.nodes[link.b];
+      if (!a || !b) return;
+      const breath = (Math.sin(t * 2) + 1) * 0.5;
+
+      if (link.isLit) {
+        // 高亮连线 + 流光
+        const gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        const ca = a.color, cb = b.color;
+        gradient.addColorStop(0, `rgba(${ca.r}, ${ca.g}, ${ca.b}, ${0.4 + breath * 0.3})`);
+        gradient.addColorStop(1, `rgba(${cb.r}, ${cb.g}, ${cb.b}, ${0.4 + breath * 0.3})`);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        // 流动小粒子
+        const flow = (t * 0.5) % 1;
+        const px = a.x + (b.x - a.x) * flow;
+        const py = a.y + (b.y - a.y) * flow;
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 200, 0.9)`;
+        ctx.fill();
+      } else {
+        // 未点亮 - 虚线 + 极淡
+        ctx.strokeStyle = link.cross ? 'rgba(255, 215, 100, 0.08)' : 'rgba(180, 180, 220, 0.15)';
+        ctx.lineWidth = 0.8;
+        ctx.setLineDash([3, 6]);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+
+    // 节点（呼吸+光晕）
+    p.nodes.forEach((n) => {
+      const breath = (Math.sin(t * 1.5 + n.x * 0.01) + 1) * 0.5;
+      const c = n.color;
+      if (n.isLit || n.isHub) {
+        // 外光晕
+        const gloR = n.r * 3 + breath * 4;
+        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, gloR);
+        grad.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, ${0.7 + breath * 0.3})`);
+        grad.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, gloR, 0, Math.PI * 2);
+        ctx.fill();
+        // 核心
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + breath * 1, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, 0.95)`;
+        ctx.fill();
+      } else if (n.isCurrent) {
+        // 当前 - 闪烁
+        const pulse = (Math.sin(t * 4) + 1) * 0.5;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + pulse * 3, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${0.5 + pulse * 0.5})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.6)`;
+        ctx.fill();
+      } else {
+        // 未点亮 - 暗淡
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(150, 150, 180, ${0.3 + breath * 0.1})`;
+        ctx.fill();
+      }
+    });
+
+    ctx.restore();
+  };
+
+  // 适配 retina
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      if (physics.current) {
+        physics.current.w = w;
+        physics.current.h = h;
+        physics.current.cx = w / 2;
+        physics.current.cy = h / 2;
+      }
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  // 触摸 / 鼠标交互：拖动 + 双指缩放
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let dragging = false;
+    let startX = 0, startY = 0;
+    let startPanX = 0, startPanY = 0;
+    let pinchStartDist = 0;
+    let pinchStartScale = 1;
+
+    const getPos = (e) => {
+      if (e.touches && e.touches[0]) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      return { x: e.clientX, y: e.clientY };
+    };
+
+    const distance = (t1, t2) => {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const onDown = (e) => {
+      if (e.touches && e.touches.length === 2) {
+        pinchStartDist = distance(e.touches[0], e.touches[1]);
+        pinchStartScale = transformRef.current.scale;
+        dragging = false;
+        return;
+      }
+      dragging = true;
+      const p = getPos(e);
+      startX = p.x;
+      startY = p.y;
+      startPanX = transformRef.current.panX;
+      startPanY = transformRef.current.panY;
+    };
+
+    const onMove = (e) => {
+      if (e.touches && e.touches.length === 2) {
+        e.preventDefault();
+        const d = distance(e.touches[0], e.touches[1]);
+        const newScale = Math.max(0.5, Math.min(3, pinchStartScale * (d / pinchStartDist)));
+        transformRef.current.scale = newScale;
+        setScale(newScale);
+        return;
+      }
+      if (!dragging) return;
+      e.preventDefault();
+      const p = getPos(e);
+      transformRef.current.panX = startPanX + (p.x - startX);
+      transformRef.current.panY = startPanY + (p.y - startY);
+      setPan({ x: transformRef.current.panX, y: transformRef.current.panY });
+    };
+
+    const onUp = (e) => {
+      dragging = false;
+    };
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newScale = Math.max(0.5, Math.min(3, transformRef.current.scale * delta));
+      transformRef.current.scale = newScale;
+      setScale(newScale);
+    };
+
+    canvas.addEventListener('mousedown', onDown);
+    canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseup', onUp);
+    canvas.addEventListener('mouseleave', onUp);
+    canvas.addEventListener('touchstart', onDown, { passive: true });
+    canvas.addEventListener('touchmove', onMove, { passive: false });
+    canvas.addEventListener('touchend', onUp);
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+
+    // 单击节点
+    const onClick = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const { scale: sc, panX, panY } = transformRef.current;
+      const wx = (cx - panX) / sc;
+      const wy = (cy - panY) / sc;
+      const p = physics.current;
+      if (!p) return;
+      for (const n of p.nodes) {
+        const dx = wx - n.x;
+        const dy = wy - n.y;
+        if (Math.sqrt(dx * dx + dy * dy) < n.r + 8) {
+          haptic.light();
+          setSelectedNode(n.meta);
+          return;
+        }
+      }
+    };
+    canvas.addEventListener('click', onClick);
+
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', handleResize);
+      canvas.removeEventListener('mousedown', onDown);
+      canvas.removeEventListener('mousemove', onMove);
+      canvas.removeEventListener('mouseup', onUp);
+      canvas.removeEventListener('mouseleave', onUp);
+      canvas.removeEventListener('touchstart', onDown);
+      canvas.removeEventListener('touchmove', onMove);
+      canvas.removeEventListener('touchend', onUp);
+      canvas.removeEventListener('wheel', onWheel);
+      canvas.removeEventListener('click', onClick);
     };
   }, []);
 
-  const renderConstellation = (charId, color, name, avatar) => {
-    const nodes = STORY_NODES[charId];
-    const triggered = triggeredMap[charId] || [];
-
-    return (
-      <g key={charId}>
-        {/* 连接线 */}
-        {nodes.slice(0, -1).map((n, i) => {
-          const nextN = nodes[i + 1];
-          const isLit = i < triggered.length;
-          return (
-            <line
-              key={`line-${i}`}
-              x1={`${n.x}%`} y1={`${n.y}%`}
-              x2={`${nextN.x}%`} y2={`${nextN.y}%`}
-              stroke={isLit ? color : 'rgba(255,255,255,0.15)'}
-              strokeWidth={isLit ? 2 : 1}
-              strokeDasharray={isLit ? '0' : '4 4'}
-              style={{ filter: isLit ? `drop-shadow(0 0 4px ${color})` : 'none' }}
-            />
-          );
-        })}
-        {/* 标签 */}
-        <text x="1%" y={`${nodes[0].y}%`} fill={color} fontSize="12" fontWeight="700">
-          {avatar} {name}
-        </text>
-      </g>
-    );
-  };
-
-  const renderNode = (charId, color) => {
-    const nodes = STORY_NODES[charId];
-    const triggered = triggeredMap[charId] || [];
-
-    return nodes.map((n, i) => {
-      const isLit = i < triggered.length;
-      const isCurrent = i === triggered.length;
-      return (
-        <button
-          key={`${charId}-${i}`}
-          className={`sky-node ${isLit ? 'lit' : isCurrent ? 'current' : 'locked'}`}
-          style={{
-            left: `${n.x}%`,
-            top: `${n.y}%`,
-            color: isLit ? color : '#ccc',
-            borderColor: isLit ? color : 'rgba(255,255,255,0.3)',
-            boxShadow: isLit ? `0 0 12px ${color}, 0 0 24px ${color}80` : 'none'
-          }}
-          onClick={() => {
-            haptic.light();
-            setSelectedNode({ ...n, charId, name: charId === 'liMing' ? '李明' : charId === 'wangWu' ? '王五' : '陈娟', isLit, color });
-          }}
-        >
-          {isLit ? '★' : isCurrent ? '●' : '○'}
-        </button>
-      );
-    });
-  };
-
   const totalNodes = Object.values(STORY_NODES).flat().length;
-  const litNodes = Object.values(triggeredMap).reduce((s, a) => s + a.length, 0);
+  const litNodes = Object.values(triggeredMap).reduce((s, n) => s + n, 0);
 
   return (
     <div className="causal-sky-overlay" ref={containerRef}>
@@ -177,43 +429,33 @@ const CausalSky = ({ onClose }) => {
 
       <div className="sky-header">
         <button className="sky-close" onClick={onClose}>← 返回</button>
-        <div className="sky-title">⛩️ 因果天网</div>
-        <div className="sky-progress">已点亮 {litNodes} / {totalNodes}</div>
+        <div className="sky-title">⛩️ 因果星轨</div>
+        <div className="sky-progress">{litNodes} / {totalNodes} 星辰</div>
       </div>
 
-      <svg className="sky-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {renderConstellation('liMing', '#88c4ff', '李明', '👨‍🎓')}
-        {renderConstellation('wangWu', '#ff9988', '王五', '👨‍🍳')}
-        {renderConstellation('chenJuan', '#ffcc88', '陈娟', '👩‍💼')}
-      </svg>
+      <div className="sky-instructions">
+        <span>👆 单指拖动 · 双指缩放 · 点击星辰</span>
+      </div>
 
-      <div className="sky-nodes-layer">
-        {renderNode('liMing', '#88c4ff')}
-        {renderNode('wangWu', '#ff9988')}
-        {renderNode('chenJuan', '#ffcc88')}
+      <div className="sky-legend">
+        <span style={{ color: '#88c4ff' }}>● 李明</span>
+        <span style={{ color: '#ff9988' }}>● 王五</span>
+        <span style={{ color: '#ffcc88' }}>● 陈娟</span>
+        <span style={{ color: '#ffd700' }}>● 神格中心</span>
       </div>
 
       {selectedNode && (
         <div className="sky-modal" onClick={() => setSelectedNode(null)}>
-          <div className="sky-modal-card" onClick={e => e.stopPropagation()} style={{ borderColor: selectedNode.color }}>
-            <div className="sky-modal-badge" style={{ background: selectedNode.color }}>
-              Day {selectedNode.day} · {selectedNode.name}
+          <div className="sky-modal-card" onClick={e => e.stopPropagation()}>
+            <div className="sky-modal-badge">
+              {selectedNode.charName ? `${selectedNode.charName} · Day ${selectedNode.day}` : selectedNode.title}
             </div>
             <h3>{selectedNode.title}</h3>
             <p>{selectedNode.desc}</p>
-            {selectedNode.isLit ? (
-              <div className="sky-modal-status lit">✨ 你点亮了这颗星</div>
-            ) : (
-              <div className="sky-modal-status locked">🔒 未触发 · 继续帮助 {selectedNode.name} 来解锁</div>
-            )}
             <button onClick={() => setSelectedNode(null)} className="sky-modal-close">关闭</button>
           </div>
         </div>
       )}
-
-      <div className="sky-legend">
-        ★ 已点亮 · ● 当前 · ○ 未触发 — 继续游戏可点亮更多星辰
-      </div>
     </div>
   );
 };

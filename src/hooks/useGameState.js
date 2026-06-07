@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { initialCharacters, initialGods, initialWishes, wishTemplates, gameConfig, godMessages, godChatStarters } from '../data/gameData';
+import { saveGame, loadGame } from '../utils/saveLoad';
 
 export const useGameState = () => {
   const [gameState, setGameState] = useState({
@@ -44,20 +45,14 @@ export const useGameState = () => {
   const messageTimerRef = useRef(null);
   const lastMessageTimeRef = useRef({});
 
-  // 被动收入：凡人每25秒自动上香+2，神力每25秒自动+1
+  // 自动保存（每次 state 变化）
   useEffect(() => {
-    const tick = setInterval(() => {
-      setGameState(prev => {
-        if (prev.phase !== 'wish' && prev.phase !== 'result') return prev;
-        return {
-          ...prev,
-          incense: prev.incense + 2,
-          power: Math.min(prev.maxPower, prev.power + 1)
-        };
-      });
-    }, 25000);
-    return () => clearInterval(tick);
-  }, []);
+    if (gameState.phase === 'wish' || gameState.phase === 'result' || gameState.phase === 'finale') {
+      saveGame(gameState);
+    }
+  }, [gameState]);
+
+  // 被动收入已移除 - 资源完全靠玩家自己挣
 
   // 隐藏神仙解锁监听
   useEffect(() => {
@@ -263,16 +258,16 @@ export const useGameState = () => {
       const source = shuffledSources[i % shuffledSources.length];
       const templates = wishTemplates[source];
       
-      const usedIndices = gameState.processedWishes
+      const recentUsed = gameState.processedWishes
         .filter(w => w.characterId === source)
+        .slice(-6)
         .map(w => w.templateIndex);
-      
+
       let availableTemplates = templates
         .map((template, idx) => ({ idx, template }))
-        .filter(({ idx }) => !usedIndices.includes(idx));
+        .filter(({ idx }) => !recentUsed.includes(idx));
 
       if (availableTemplates.length === 0) {
-        // 模板用完后重置，允许循环使用
         availableTemplates = templates.map((template, idx) => ({ idx, template }));
       }
       
@@ -447,6 +442,15 @@ export const useGameState = () => {
       }
     }
   }, [gameState.characters, addMoment, generateNewWishes, updateDivineAttributes, triggerGodMessage]);
+
+  const continueFromSave = useCallback(() => {
+    const saved = loadGame();
+    if (saved) {
+      setGameState(prev => ({ ...prev, ...saved }));
+      return true;
+    }
+    return false;
+  }, []);
 
   const startGame = useCallback(() => {
     setGameState(prev => {
@@ -635,6 +639,7 @@ export const useGameState = () => {
     gameState,
     setGameState,
     startGame,
+    continueFromSave,
     selectWish,
     processWish,
     addMoment,

@@ -241,7 +241,7 @@ const MessageListOverlay = ({ onClose, onOpenPrivateChat }) => {
 };
 
 const PrivateChatScreen = ({ godId, onClose, cameFromList }) => {
-  const { gameState, replyToMessage, startGodConversation } = useGame();
+  const { gameState, replyToMessage, startGodConversation, claimRedPacket } = useGame();
   const [showReplyOptions, setShowReplyOptions] = useState(false);
   const [showStarters, setShowStarters] = useState(false);
   const chatEndRef = React.useRef(null);
@@ -250,7 +250,7 @@ const PrivateChatScreen = ({ godId, onClose, cameFromList }) => {
   const chatHistory = [
     ...gameState.godMessages.filter(msg => msg.godId === godId),
     ...gameState.godMessagesQueue.filter(msg => msg.godId === godId)
-  ].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  ];
 
   const starters = godChatStarters[godId] || [];
 
@@ -299,19 +299,47 @@ const PrivateChatScreen = ({ godId, onClose, cameFromList }) => {
               <p style={{ fontSize: '12px', color: '#aaa' }}>处理愿望后会收到消息，或者主动发起话题👇</p>
             </div>
           ) : (
-            chatHistory.map(msg => (
-              <div key={msg.id} className={`chat-message-item ${msg.isPlayer ? 'player-msg' : ''}`}>
-                {!msg.isPlayer && (
-                  <div className="msg-avatar-small">{god?.avatar}</div>
-                )}
-                <div className="msg-bubble-wrap">
-                  <div className={`message-bubble ${msg.isPlayer ? 'player-bubble' : 'god-bubble'}`}>
-                    {msg.message}
+            chatHistory.map(msg => {
+              if (msg.isRedPacket) {
+                const claimed = msg.claimed || !gameState.godMessagesQueue.some(m => m.id === msg.id);
+                return (
+                  <div key={msg.id} className="chat-message-item">
+                    <div className="msg-avatar-small">{god?.avatar}</div>
+                    <div className="msg-bubble-wrap">
+                      <div
+                        className={`red-packet-bubble ${claimed ? 'claimed' : ''}`}
+                        onClick={() => {
+                          if (!claimed) { haptic.success(); claimRedPacket(msg.id); }
+                        }}
+                      >
+                        <div className="rp-icon">🧧</div>
+                        <div className="rp-content">
+                          <div className="rp-title">{claimed ? '已领取' : '点击拆开红包'}</div>
+                          <div className="rp-msg">{msg.message}</div>
+                          {claimed && (
+                            <div className="rp-amount">已领 +{msg.amount.incense}🔥 +{msg.amount.power}⚡</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="message-time">{msg.timestamp}</div>
+                    </div>
                   </div>
-                  <div className="message-time">{msg.timestamp}</div>
+                );
+              }
+              return (
+                <div key={msg.id} className={`chat-message-item ${msg.isPlayer ? 'player-msg' : ''}`}>
+                  {!msg.isPlayer && (
+                    <div className="msg-avatar-small">{god?.avatar}</div>
+                  )}
+                  <div className="msg-bubble-wrap">
+                    <div className={`message-bubble ${msg.isPlayer ? 'player-bubble' : 'god-bubble'}`}>
+                      {msg.message}
+                    </div>
+                    <div className="message-time">{msg.timestamp}</div>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
           {isGodTyping && (
             <div className="chat-message-item">

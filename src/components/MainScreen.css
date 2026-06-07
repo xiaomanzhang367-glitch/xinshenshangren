@@ -629,6 +629,67 @@
   border: 1px solid var(--border-color);
 }
 
+.red-packet-bubble {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border-radius: 14px;
+  color: white;
+  max-width: 240px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 12px rgba(231, 76, 60, 0.35);
+  animation: rpPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes rpPulse {
+  0%, 100% { box-shadow: 0 3px 12px rgba(231, 76, 60, 0.35); }
+  50% { box-shadow: 0 3px 20px rgba(231, 76, 60, 0.7); }
+}
+
+.red-packet-bubble:hover {
+  transform: scale(1.03);
+}
+
+.red-packet-bubble.claimed {
+  background: linear-gradient(135deg, #a8a8a8, #888);
+  box-shadow: none;
+  animation: none;
+  cursor: default;
+  opacity: 0.85;
+}
+
+.rp-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.rp-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.rp-msg {
+  font-size: 11px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.rp-amount {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffeb3b;
+}
+
 .player-message {
   flex-direction: row-reverse;
 }

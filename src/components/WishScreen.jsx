@@ -34,13 +34,15 @@ const WishScreen = () => {
       const source = shuffledSources[i % shuffledSources.length];
       const templates = wishTemplates[source];
       
-      const usedIndices = gameState.processedWishes
+      // 只看最近 6 次的已处理愿望，避免永久排除
+      const recentUsed = gameState.processedWishes
         .filter(w => w.characterId === source)
+        .slice(-6)
         .map(w => w.templateIndex);
-      
+
       let availableTemplates = templates
         .map((template, idx) => ({ idx, template }))
-        .filter(({ idx }) => !usedIndices.includes(idx));
+        .filter(({ idx }) => !recentUsed.includes(idx));
 
       if (availableTemplates.length === 0) {
         availableTemplates = templates.map((template, idx) => ({ idx, template }));
@@ -78,7 +80,8 @@ const WishScreen = () => {
       haptic.spooky();
       const text = `${wish.title} ${wish.description}`;
       const matched = trickyWishOutcomes.find(o => o.trigger.some(t => text.includes(t)));
-      const outcome = matched ? matched.result : genericTrickyOutcomes[Math.floor(Math.random() * genericTrickyOutcomes.length)];
+      // 没匹配上就随机选一篇
+      const outcome = matched || trickyWishOutcomes[Math.floor(Math.random() * trickyWishOutcomes.length)];
       setTrickyEvent({ wish, option, outcome });
       return;
     }
@@ -403,12 +406,15 @@ const TrickyEventOverlay = ({ event, onConfirm }) => {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [comments] = useState(() => {
-    const shuffled = [...RANDOM_COMMENTS].sort(() => Math.random() - 0.5).slice(0, 4);
+    const shuffled = [...RANDOM_COMMENTS].sort(() => Math.random() - 0.5).slice(0, 5);
     return shuffled;
   });
-  const title = RANDOM_TITLES[Math.floor(Math.random() * RANDOM_TITLES.length)];
-  const tags = [...RANDOM_TAGS].sort(() => Math.random() - 0.5).slice(0, 3);
-  const img = RANDOM_IMAGES[Math.floor(Math.random() * RANDOM_IMAGES.length)];
+  // 使用完整爆贴内容
+  const outcome = event.outcome;
+  const title = outcome.title || RANDOM_TITLES[Math.floor(Math.random() * RANDOM_TITLES.length)];
+  const tags = outcome.tags || RANDOM_TAGS.slice(0, 3);
+  const img = outcome.emoji || RANDOM_IMAGES[Math.floor(Math.random() * RANDOM_IMAGES.length)];
+  const bodyText = outcome.body || outcome.result || '';
   const likes = Math.floor(Math.random() * 4000) + 800;
   const savesCount = Math.floor(likes / 4);
 
@@ -435,7 +441,11 @@ const TrickyEventOverlay = ({ event, onConfirm }) => {
         {/* 标题+正文 */}
         <div className="xhs-content">
           <h3 className="xhs-title">🔥 {title}</h3>
-          <p className="xhs-body">"{event.outcome}"</p>
+          <div className="xhs-body">
+            {bodyText.split('\n').map((line, i) => (
+              <p key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+            ))}
+          </div>
 
           <div className="xhs-author">
             <span>👤 匿名凡人 · 2 分钟前</span>
@@ -583,6 +593,11 @@ const WishDetail = ({ wish, character, onStartMiniGame }) => {
   return (
     <div className="wish-detail-overlay" onClick={() => setGameState(prev => ({...prev, currentWish: null}))}>
       <div className="wish-detail card animate-slide-in" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="wish-close-btn"
+          onClick={() => setGameState(prev => ({...prev, currentWish: null}))}
+          title="关闭"
+        >×</button>
         <div className="wish-char-header">
           <div className="char-avatar-large">{character.avatar}</div>
           <div className="char-info">

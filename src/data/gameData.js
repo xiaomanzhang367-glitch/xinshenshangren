@@ -124,37 +124,37 @@ export const miniGames = {
   接东西: {
     name: '知识接接乐',
     description: '接到书本加分！',
-    duration: 20,
+    duration: 35,
     powerCost: 10
   },
   配对: {
     name: '心心相印',
     description: '配对相同的心形！',
-    duration: 20,
+    duration: 35,
     powerCost: 10
   },
   跳台阶: {
     name: '步步高升',
     description: '跳上更高台阶！',
-    duration: 20,
+    duration: 40,
     powerCost: 10
   },
   连连看: {
-    name: '智慧连连看',
-    description: '消除相同图案！',
-    duration: 25,
+    name: '开心消消乐',
+    description: '相邻交换3连消除！',
+    duration: 45,
     powerCost: 12
   },
   答题: {
     name: '知识问答',
     description: '答对题目加分！',
-    duration: 15,
+    duration: 30,
     powerCost: 8
   },
   点灯: {
     name: '功德点灯',
     description: '按顺序点亮莲花灯！',
-    duration: 25,
+    duration: 40,
     powerCost: 10
   }
 };
@@ -553,7 +553,7 @@ export const wishTemplates = {
   liMing: [
     {
       title: '求四六级通过！',
-      description: '神明大人！下周就要考四六级了，这已经是我第三次考了...',
+      description: '神明大人！下周就要考四六级了，这已经是我第三次考了，再不过我妈要把我送去山里禅修...',
       category: '学业',
       gameType: '接东西',
       options: [
@@ -563,79 +563,123 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求面试顺利！',
-      description: '神明大人！我投了上海一家互联网公司，明天就要面试了！',
+      title: '求别再梦见高考！',
+      description: '已经毕业三年了，每天还在梦里被监考老师收卷！求神明把我的高考记忆封印起来！',
+      category: '玄学',
+      gameType: '点灯',
+      options: [
+        { text: '封印记忆', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '调成快乐版', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我的实习被转正',
+      description: '已经实习四个月了，HR天天画饼，但我已经能背出公司的所有故事会版本了...求神明显灵！',
       category: '职场',
       gameType: '跳台阶',
       options: [
-        { text: '全力加持', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求论文通过！',
-      description: '神明大人！导师说我的论文还差很多，可是马上就要答辩了...',
-      category: '学业',
-      gameType: '答题',
-      options: [
-        { text: '全力加持', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求考个好成绩！',
-      description: '神明大人！下周就要期末考试了，求你让我考个好成绩吧！',
-      category: '学业',
-      gameType: '连连看',
-      options: [
-        { text: '全力加持', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求实习offer！',
-      description: '神明大人！我投了三十多份实习简历，一个回音都没有，我真的好焦虑啊...',
-      category: '职场',
-      gameType: '点灯',
-      options: [
-        { text: '投递加持', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让HR说人话', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '加点运气', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求考研上岸！',
-      description: '神明大人！我备考了整整一年，专业课好难，求您让我考上心仪的学校！',
+      title: '求我能看见的"幸运数字"是真的',
+      description: '神明大人！我突然能看到陌生人头顶飘着数字，越亮的数字越大。这是开光了还是脑子出问题了？',
+      category: '玄学',
+      gameType: '答题',
+      options: [
+        { text: '确认是开光', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '让他看清规则', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求论文答辩别被怼',
+      description: '导师说我的论文像"小学生的日记"，明天就要答辩了！神明大人救我！',
       category: '学业',
       gameType: '答题',
       options: [
-        { text: '全力加持', description: '消耗神力18', powerCost: 18, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '让评委生病请假', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让我口才爆表', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求和室友关系好！',
-      description: '神明大人！我和室友最近因为卫生问题吵架了，宿舍气氛好尴尬...',
-      category: '人际',
+      title: '求我暗恋的人也暗恋我',
+      description: '我们做同桌3年了，她还以为我是直的(其实我是直的)。求神明让她主动!!!',
+      category: '姻缘',
       gameType: '配对',
       options: [
-        { text: '化解矛盾', description: '消耗神力12', powerCost: 12, effect: 'excellent' },
-        { text: '稍微缓和', description: '消耗神力6', powerCost: 6, effect: 'normal' },
+        { text: '直接告白', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '增加桃花气场', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求家人健康！',
-      description: '神明大人！我妈最近体检有些指标不好，在外地读书好担心，求您保佑她！',
-      category: '健康',
-      gameType: '连连看',
+      title: '求室友别再煮螺蛳粉',
+      description: '我快被熏吐了，宿舍气味已经渗进我的羽绒服。求神明让他改吃别的，要是能让他爱上吃草那就更好了！',
+      category: '生活',
+      gameType: '接东西',
       options: [
-        { text: '保佑平安', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微保佑', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '让他爱上草', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让他短暂失嗅', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我那只乌龟开口说话',
+      description: '我感觉它每天都用很有戏的眼神盯着我，我觉得它一定有话要对我说。神明能让它开口吗？',
+      category: '玄学',
+      gameType: '点灯',
+      options: [
+        { text: '赋予言语', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '只让它唱歌', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求老板今天别让我开摄像头',
+      description: '我已经三天没洗头了！并且穿着花裤衩！主管说今天必须开摄像头开会！神明救我！',
+      category: '职场',
+      gameType: '跳台阶',
+      options: [
+        { text: '让全公司断网', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让我的摄像头坏', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我前世的记忆',
+      description: '神明大人，最近老梦见自己在战国时代当过将军。我能不能确认一下我是不是穿越人士？',
+      category: '玄学',
+      gameType: '答题',
+      options: [
+        { text: '解锁全部前世', description: '消耗神力25', powerCost: 25, effect: 'excellent' },
+        { text: '小小提示一下', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求亲戚别问我工资',
+      description: '过年回家被堂哥堂嫂围攻了三圈，我说月薪3000他们都笑我，我说月薪3万他们以为我吹牛，求神明！',
+      category: '家庭',
+      gameType: '配对',
+      options: [
+        { text: '让他们集体失忆', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让我变隐身', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我抢到周杰伦的演唱会票',
+      description: '已经守了三年了，求神明开个外挂！票贩子的票贵到能让我爸妈拿来骂我半年！',
+      category: '运气',
+      gameType: '接东西',
+      options: [
+        { text: '直接安排', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '加点手速', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     }
@@ -653,79 +697,123 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求生意兴隆！',
-      description: '神明大人！我的面馆开起来了，可是客人好少...',
+      title: '求面馆的房租别涨',
+      description: '房东那个老狐狸看我生意稍微好一点就要涨租，求神明让他梦见祖宗显灵叫他别涨！',
+      category: '职场',
+      gameType: '答题',
+      options: [
+        { text: '托梦显灵', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让我嘴皮溜', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求救下那只受伤的小狐狸',
+      description: '我刚才在后山看到一只受伤的红毛狐狸，眼神特别灵，感觉它能听懂人话！求神明救它！',
+      category: '玄学',
+      gameType: '点灯',
+      options: [
+        { text: '神力治愈', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '送它草药', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求面馆能上抖音热门',
+      description: '神明，我研发了"麻辣螺蛳鸭血粉丝面"，结果客人觉得是黑暗料理。求让流量来救我！',
       category: '职场',
       gameType: '接东西',
       options: [
-        { text: '吸引客人', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '一夜爆火', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '小红书出圈', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求老婆别再让我刷碗了',
+      description: '已经连续刷了37天了！我的手都泡发了！求神明给我一个洗碗机或者一段假期！',
+      category: '家庭',
+      gameType: '配对',
+      options: [
+        { text: '老婆心情大好', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让碗自己跳', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我儿子别在小学就早恋',
+      description: '神明！我儿子才7岁，今天回家说他要给班里的"女神"送礼物！我什么时候有这么早熟的儿子的？！',
+      category: '家庭',
+      gameType: '跳台阶',
+      options: [
+        { text: '让他先学习', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让女神转学', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求银行别再打贷款电话',
+      description: '我已经3年没贷过款了！但他们每天还打10个电话！求神明让他们把我的号码弄丢！',
+      category: '生活',
+      gameType: '答题',
+      options: [
+        { text: '号码消失', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让电话失灵', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求让那只小狐狸能开口说话',
+      description: '神明，我救的那只狐狸眼神越来越灵，我感觉它修炼成精了！求它开口跟我说一句话！',
+      category: '玄学',
+      gameType: '点灯',
+      options: [
+        { text: '完全开口', description: '消耗神力25', powerCost: 25, effect: 'excellent' },
+        { text: '让它点头摇头', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求父亲来我的面馆看一眼',
+      description: '我爸说我开面馆是没出息，三年没来看过。求神明让他来一次，骂我一顿都行...',
+      category: '家庭',
+      gameType: '配对',
+      options: [
+        { text: '托梦让他来', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让他经过', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我去年丢的金链子能回来',
+      description: '是我妈给的传家宝！我把它弄丢在某个出租车上，已经找了一年了。求神明显灵！',
+      category: '生活',
+      gameType: '接东西',
+      options: [
+        { text: '一夜归来', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '指引方向', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我能戒掉熬夜刷短视频',
+      description: '我都38了！每天凌晨3点才睡！但是手指它不听我的啊！求神明把我的手指封了！',
+      category: '生活',
+      gameType: '跳台阶',
+      options: [
+        { text: '一觉睡到天亮', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
         { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求资金周转！',
-      description: '神明大人！面馆进货需要钱，求你让我周转一下吧！',
-      category: '职场',
-      gameType: '配对',
-      options: [
-        { text: '全力帮忙', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力10', powerCost: 10, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求找个好工作！',
-      description: '神明大人！我不想再摆地摊了，求您让我找到一份稳定的工作吧！',
-      category: '职场',
+      title: '求能跟去世的妈说一句话',
+      description: '我都不知道她想我没。神明...就一句话也行，我想告诉她我现在过得还可以...',
+      category: '玄学',
       gameType: '点灯',
       options: [
-        { text: '帮他找工作', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '加点运气', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求房租不涨！',
-      description: '神明大人！房东说下个月要涨三百块房租，现在就够难了，求你让他打消这个念头！',
-      category: '财运',
-      gameType: '接东西',
-      options: [
-        { text: '劝说房东', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '加点运气', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求父母理解我！',
-      description: '神明大人！我爸妈总说我没出息，让我回老家找份稳定工作，我不甘心啊...',
-      category: '人际',
-      gameType: '答题',
-      options: [
-        { text: '让父母理解', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '缓和关系', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求遇到贵人！',
-      description: '神明大人！这条路太难走了，求你给我指一条明路，或者让我遇到帮助我的贵人！',
-      category: '职场',
-      gameType: '配对',
-      options: [
-        { text: '引荐贵人', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
-        { text: '增加运气', description: '消耗神力10', powerCost: 10, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求顾客回头！',
-      description: '神明大人！面馆上次有个大客户，吃了一次就没再来，求你让他想起我的面！',
-      category: '职场',
-      gameType: '接东西',
-      options: [
-        { text: '勾起食欲', description: '消耗神力12', powerCost: 12, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力6', powerCost: 6, effect: 'normal' },
+        { text: '托梦相见', description: '消耗神力25', powerCost: 25, effect: 'excellent' },
+        { text: '只让我感觉她在', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     }
@@ -743,147 +831,169 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求相亲顺利！',
-      description: '神明大人！我妈又给我安排了相亲，希望这次能遇到个正常人...',
+      title: '求外婆的回信能再来一次',
+      description: '神明，三个月前我寄了一封信给已经去世的外婆。结果上周收到了回信，里面写"咸鱼别熬太晚"，是外婆的字！',
+      category: '玄学',
+      gameType: '点灯',
+      options: [
+        { text: '让外婆再回信', description: '消耗神力25', powerCost: 25, effect: 'excellent' },
+        { text: '让我能再寄一次', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我那个相亲对象不是变态',
+      description: '今天又是闺蜜推荐的。前三个都让我怀疑人生：一个让我帮他写论文，一个让我借钱，一个直接说"做我老婆"。求一个正常人！',
       category: '姻缘',
       gameType: '配对',
       options: [
-        { text: '遇到合适的', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '让气氛不尴尬', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '送来真命天子', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '至少是正常人', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求谈恋爱！',
-      description: '神明大人！看着闺蜜都结婚生子了，我也好想有个伴...',
-      category: '姻缘',
-      gameType: '配对',
-      options: [
-        { text: '红线牵缘', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
-        { text: '增加桃花运', description: '消耗神力10', powerCost: 10, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求工作顺利！',
-      description: '神明大人！最近工作压力好大，求你让我工作顺利一点吧！',
-      category: '职场',
-      gameType: '答题',
-      options: [
-        { text: '让工作顺利', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求升职加薪！',
-      description: '神明大人！我在公司熬了整整三年，同批进来的同事都升职了，就我还是原地踏步...',
+      title: '求老板别再让我加班了',
+      description: '已经连续加班17天了！我都开始幻觉听见老板的声音了！求神明让他生个小病请假一周！',
       category: '职场',
       gameType: '跳台阶',
       options: [
-        { text: '全力加持', description: '消耗神力18', powerCost: 18, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '让老板感冒', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让他迟到', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求遇到真命天子！',
-      description: '神明大人！相了这么多次亲不是妈宝男就是凤凰男，我只想找个正常的人谈恋爱！',
-      category: '姻缘',
-      gameType: '连连看',
+      title: '求我家阳台的窗户能再打开',
+      description: '从某天开始，我家阳台的窗户怎么都打不开。我隔壁阿姨说是有"东西"住进来了。求神明帮我看看！',
+      category: '玄学',
+      gameType: '答题',
       options: [
-        { text: '牵一根好红线', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
-        { text: '增加缘分', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '送走那东西', description: '消耗神力25', powerCost: 25, effect: 'excellent' },
+        { text: '问问它要什么', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求买到限量包！',
-      description: '神明大人！那个限量款手袋今天正式发售，求你让我抢到！就一个！',
-      category: '财运',
+      title: '求闺蜜婚礼别让我做伴娘',
+      description: '我是单身，让我做伴娘等于公开处刑！她还说要给我安排5个伴郎相亲！神明救我！',
+      category: '姻缘',
       gameType: '接东西',
       options: [
-        { text: '助她抢购', description: '消耗神力12', powerCost: 12, effect: 'excellent' },
-        { text: '加点手气', description: '消耗神力6', powerCost: 6, effect: 'normal' },
+        { text: '让我感冒', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让伴郎都丑', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求朋友不内卷！',
-      description: '神明大人！我朋友圈里大家都在晒加班、晒证书，好有压力，求你让我内心平静！',
-      category: '健康',
+      title: '求老板别再给我画饼',
+      description: '说了三年要升我经理，给的"饼"都能开烘焙店了。求神明让他要么兑现，要么闭嘴！',
+      category: '职场',
       gameType: '配对',
       options: [
-        { text: '赐她平静', description: '消耗神力10', powerCost: 10, effect: 'excellent' },
-        { text: '稍微缓解', description: '消耗神力5', powerCost: 5, effect: 'normal' },
+        { text: '直接升职', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '让他给加薪', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求养的金鱼别再用人话骂我',
+      description: '神明！我家金鱼今天突然冒出一句"懒"，我以为是幻觉，结果它越骂越多！这是修炼成精了？',
+      category: '玄学',
+      gameType: '答题',
+      options: [
+        { text: '让它沉默', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '只让它说鼓励的', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我妈别再让我学开车',
+      description: '我已经科目二挂了5次了！她还安排我去其他城市考！求神明让驾校倒闭吧！',
+      category: '生活',
+      gameType: '跳台阶',
+      options: [
+        { text: '让我突然开窍', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让妈改变想法', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求一个能听懂我话的朋友',
+      description: '我说"今天有点丧"，所有人都让我"加油"。神明，我不要鸡汤，我要一个能陪我喝奶茶的人！',
+      category: '生活',
+      gameType: '配对',
+      options: [
+        { text: '送来灵魂朋友', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '让某个老友联系我', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我能看到2030年的自己',
+      description: '我突然好想知道5年后我是结婚了、出家了、还是辞职去环游世界了。神明能让我穿越一秒吗？',
+      category: '玄学',
+      gameType: '点灯',
+      options: [
+        { text: '送一段未来记忆', description: '消耗神力25', powerCost: 25, effect: 'excellent' },
+        { text: '让我做个梦', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我妈别再问我朋友圈里那个男生',
+      description: '那是同事的合照，她以为是我男友追问了一周！求神明让她转移注意力！',
+      category: '家庭',
+      gameType: '接东西',
+      options: [
+        { text: '让妈追剧上头', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '稍微缓解', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     }
   ],
   random: [
     {
-      title: '求财运！',
-      description: '神明大人！最近手气不太好，求您赐我点财运吧！',
-      category: '财运',
-      gameType: '接东西',
-      options: [
-        { text: '赐你财运', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
-        { text: '加点运气', description: '消耗神力10', powerCost: 10, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求健康！',
-      description: '神明大人！最近身体不太舒服，求您保佑我健康平安！',
-      category: '健康',
+      title: '求小区门口的流浪猫被人收养',
+      description: '一只橘猫每天蹲在门口讨饭，眼神特别像我已经去世的爷爷...神明，让它有个家吧！',
+      category: '生活',
       gameType: '配对',
       options: [
-        { text: '保佑健康', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微保佑', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '送善心人', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '让它显灵卖萌', description: '消耗神力8', powerCost: 8, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
     {
-      title: '求考试通过！',
-      description: '神明大人！明天就要考试了，求您让我顺利通过！',
-      category: '学业',
+      title: '求隔壁装修早日结束',
+      description: '已经装修45天了！电钻声24小时不断！求神明让装修队全部突然请假！',
+      category: '生活',
+      gameType: '接东西',
+      options: [
+        { text: '集体请假', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
+        { text: '降低音量', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我抽奖能中一次',
+      description: '已经连续抽了500次都是"谢谢参与"！我开始怀疑后台动了手脚！神明给我开光！',
+      category: '运气',
+      gameType: '配对',
+      options: [
+        { text: '直接中大奖', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '中个小奖', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
+      ]
+    },
+    {
+      title: '求我对的暗号能被收到',
+      description: '神明！我跟天空说"如果你听见我就让今天有彩虹"，今天没彩虹，但有双层云！算不算？求确认！',
+      category: '玄学',
       gameType: '答题',
       options: [
-        { text: '全力加持', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求今天一切顺利！',
-      description: '神明大人！今天有好多重要的事要做，求你让一切都顺顺利利的！',
-      category: '运气',
-      gameType: '配对',
-      options: [
-        { text: '赐你好运', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微加持', description: '消耗神力8', powerCost: 8, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求找到停车位！',
-      description: '神明大人！我开车找停车位找了半个小时了，快要迟到了，救救我！',
-      category: '运气',
-      gameType: '接东西',
-      options: [
-        { text: '腾出车位', description: '消耗神力10', powerCost: 10, effect: 'excellent' },
-        { text: '加点运气', description: '消耗神力5', powerCost: 5, effect: 'normal' },
-        { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
-      ]
-    },
-    {
-      title: '求减肥成功！',
-      description: '神明大人！我已经节食一周了，体重纹丝不动，求您帮帮我！',
-      category: '健康',
-      gameType: '接东西',
-      options: [
-        { text: '加速代谢', description: '消耗神力15', powerCost: 15, effect: 'excellent' },
-        { text: '稍微帮忙', description: '消耗神力8', powerCost: 8, effect: 'normal' },
+        { text: '明天三道彩虹', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
+        { text: '只是巧合', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     }
@@ -1030,38 +1140,255 @@ export const godChatStarters = {
 };
 
 // 神一阵鬼一阵 - 调剂型还愿
+// 神一阵鬼一阵 - 完整长帖版（有梗有故事）
 export const trickyWishOutcomes = [
-  { trigger: ['工资', '加薪', '涨工资'], result: '公司给涨了500块，但同时取消了所有补贴和年终奖，算下来一年倒亏2000。' },
-  { trigger: ['孩子', '听话', '懂事'], result: '孩子突然高烧40度，烧得迷迷糊糊，别说顶嘴，连话都说不出来了。' },
-  { trigger: ['咖啡', '现磨'], result: '同事送了一台全自动咖啡机，但从此每天上班第一件事就是帮全部门12个人轮流做咖啡。' },
-  { trigger: ['瘦', '减肥', '体重', '120斤'], result: '大病一场，上吐下泻一周，确实瘦到了120斤，头发也掉了三分之一。' },
-  { trigger: ['暗恋', '喜欢', '相处', '在一起'], result: '公司重组，和暗恋对象分到同一个项目组，但对方成了直属领导，天天骂方案烂。' },
-  { trigger: ['彩票', '中奖', '财运'], result: '中了5块钱，但那张彩票是花了10块钱让跑腿小哥代买的，倒赔5块。' },
-  { trigger: ['休息', '周末', '别打扰'], result: '周五下班手机掉进马桶坏了，彻底失联两天，确实没人打扰，但也刷不了剧、点不了外卖。' },
-  { trigger: ['空调', '吹头'], result: '空调出风口被维修工直接堵死了，整个房间再也不制冷，变成蒸笼。' },
-  { trigger: ['同事', '闭嘴', '安静'], result: '那位同事突发急性喉炎失声两周，但养病期间把所有工作都甩给来做。' },
-  { trigger: ['陪父母', '回家', '亲情'], result: '被公司裁员，打包回老家住了半年，每天被亲妈嫌碍事、催相亲。' }
+  {
+    trigger: ['工资', '加薪', '涨工资', '钱'],
+    emoji: '🤡',
+    title: '求加薪的下场，我服了神仙的字面理解',
+    body: `兄弟们，我下班路过寺庙，进去就跟神仙磕了三个头：
+"求老板今年给我涨工资500块！"
+
+第二天HR真的把我叫去：
+"恭喜你，月薪上调500元。"
+
+我激动得想开香槟。
+HR又补了一句：
+"另外公司年终奖、餐补、交通补、过节费、健身补贴本月开始全部取消。"
+
+我算了下：**一年倒亏2000**。
+我没说话，转身又去庙里加了三炷香。
+神仙啊，您字面意思满分啊！`,
+    tags: ['#求神注意措辞', '#字面理解警告', '#神仙也会皮']
+  },
+  {
+    trigger: ['孩子', '听话', '懂事', '乖'],
+    emoji: '🥲',
+    title: '求孩子别再顶嘴，神明的解法吓到我',
+    body: `我家娃9岁，每天在家就是个移动的杠精。
+我去庙里跟神明说："让我家娃别再顶嘴！"
+
+结果第二天他突发高烧40度，烧得迷迷糊糊。
+
+确实不顶嘴了，连话都说不出来了，只能"妈......水......"
+
+我在医院走廊里哭得稀里哗啦：
+**"对不起，我宁愿他骂我。"**
+
+孩子病好之后，第一句话："妈，今天的牛奶你又忘了温！"
+我哭着抱住他："你想说什么都行！"`,
+    tags: ['#当妈的崩溃', '#神仙的解读', '#含泪笑出声']
+  },
+  {
+    trigger: ['咖啡', '现磨'],
+    emoji: '😵‍💫',
+    title: '求每天喝现磨咖啡，结果变成全部门的咖啡师',
+    body: `我跟神仙说："每天早上想喝杯现磨咖啡。"
+本意是希望咖啡机从天而降。
+
+结果同事真送了我一台全自动咖啡机。
+**放在了部门茶水间。**
+
+从那天起，每天上班第一件事：
+帮全部门12个人轮流做咖啡。
+"哥加点糖"
+"姐少放奶"
+"美式不加冰"
+
+**我自己的咖啡永远是最后一杯，做完时机器都没豆子了。**
+
+神明听见我求"现磨咖啡"，给了我现磨的机会。
+只是不是给我喝的。`,
+    tags: ['#职场打工人', '#我是奶茶店店员', '#神仙KPI']
+  },
+  {
+    trigger: ['瘦', '减肥', '体重', '120斤'],
+    emoji: '🫠',
+    title: '求瘦到120斤，神仙：包你能',
+    body: `158/138，纠结减肥两年了。
+我跟神明说："让我瘦到120斤！多少都行！"
+
+第二天早上吃了一口街边煎饼。
+**然后我连续上吐下泻一整周。**
+
+医生说细菌性胃肠炎+食物中毒。
+出院称体重：**119.8斤**。
+
+但是镜子里的我：脸色蜡黄、黑眼圈深深、头发掉了1/3。
+朋友看到我："你怎么瘦得跟难民似的？"
+
+神明真的给我瘦了。也真的"多少都行"。
+
+现在我每次许愿都加一句："**温和地、健康地**实现可以吗？"`,
+    tags: ['#减肥血泪史', '#神仙真听见了', '#许愿要谨慎']
+  },
+  {
+    trigger: ['暗恋', '喜欢', '相处', '在一起'],
+    emoji: '😭',
+    title: '求和暗恋对象多点相处时间，神仙安排明明白白',
+    body: `我们是同部门同事，他是市场总监助理。
+我每天暗中观察他三个小时。
+
+我跟神明："让我和他多点相处时间！"
+
+两周后公司组织架构调整：
+**他被升为我们组的直属领导。**
+
+第一天开会他就在所有人面前怼我：
+"你这方案是初中生写的吧？"
+
+之后他天天找我茬：
+"昨天的报表错三个数字！"
+"今天的PPT配色辣眼睛！"
+"你工位为什么放郁金香？显示你不专业！"
+
+我们确实相处时间变多了。
+**多到我每天看到他都想离职。**
+
+爱情滤镜碎了一地。`,
+    tags: ['#办公室恋情', '#暗恋的下场', '#滤镜碎一地']
+  },
+  {
+    trigger: ['彩票', '中奖', '财运', '运气'],
+    emoji: '🤡',
+    title: '求中彩票，神明满足你',
+    body: `跟神明说："让我中一次彩票，多少都算！"
+
+第二天打开手机：
+**"恭喜您中得双色球5元！"**
+
+我以为是诈骗。结果真的中了5块。
+
+**但是！** 我那张彩票是花了10块钱让饿了么跑腿小哥代买的。
+
+也就是：我赚了5元，倒贴了10元，**实际亏了5元**。
+跑腿小哥还在群里发："今天给老板代买，第二次了 [偷笑]"
+
+神仙啊，您是真的够理解"中奖"二字的字面意思了。
+下次我说"中奖"，能不能写成"赚钱"？`,
+    tags: ['#穷得真实', '#神仙的彩蛋', '#字面意思']
+  },
+  {
+    trigger: ['休息', '周末', '别打扰', '清静'],
+    emoji: '👻',
+    title: '求周末别被打扰，结果变成失联两天',
+    body: `我跟神明说："周末求让我好好休息，别被打扰。"
+
+周五晚下班，我手机**掉进马桶**。
+
+接下来两天：
+✅ 没有微信工作群消息
+✅ 没有外卖电话
+✅ 没有妈妈连环视频
+✅ 没有快递短信
+✅ 安静到能听见自己心跳
+
+但是：
+❌ 也点不了外卖
+❌ 也刷不了剧
+❌ 也不能扫码进小区
+❌ 周日晚上室友以为我死了，敲门差点报警
+
+**两天没人打扰，我快疯了。**
+周一上班，我捧着新手机说："神仙啊，我想被打扰。"`,
+    tags: ['#社交孤立焦虑', '#没手机=末日', '#神仙字面意思']
+  },
+  {
+    trigger: ['空调', '吹头', '吹风'],
+    emoji: '🥵',
+    title: '求空调别对着头吹，结果整个房间成蒸笼',
+    body: `家里空调出风口正对我脸，吹得天天感冒。
+我跟神明："让空调别对着我头吹！"
+
+第二天来了个维修师傅。
+"我看了下，您这出风口位置不合适。**我直接把它堵上吧。**"
+
+我："......什么？"
+
+师傅："好嘞，封死了！"
+
+从那天起，整个房间再也不制冷。
+**变成了一个20平米的天然桑拿房。**
+
+我现在每天在家穿冰袖、抱冰枕、贴退热贴。
+小区里的猫都不肯进我家。
+
+神仙啊，**精准解决问题**这一点没人能教您。`,
+    tags: ['#夏天的崩溃', '#过度服务', '#神仙搞笑']
+  },
+  {
+    trigger: ['同事', '闭嘴', '安静', '讨厌'],
+    emoji: '🤐',
+    title: '求讨厌的同事闭嘴，神明：闭得彻底',
+    body: `公司有个Sales叫小杨，每天在工位讲电话像广播员。
+我跟神明："求让她闭嘴两周！"
+
+**结果第二天她突发急性喉炎，失声两周。**
+
+我一开始挺开心，工位终于清静了。
+但是她那两周的活——
+
+**全部甩给我做。**
+
+她每天微信我："姐救我，这客户你跟一下，我说不了话😭"
+"姐这个会议你帮我开一下😭"
+"姐我现在去医院，剩下的Excel拜托你🙏"
+
+**两周后她回来时已经康复，我崩溃了。**
+
+我以后再也不敢拿"闭嘴"许愿了。`,
+    tags: ['#职场报应', '#愿望反噬', '#神明精准打击']
+  },
+  {
+    trigger: ['陪父母', '回家', '亲情'],
+    emoji: '😩',
+    title: '求多陪陪父母，神明：包你陪一年',
+    body: `我跟神明："想多陪陪爸妈，最好能回老家住一段时间。"
+
+结果第二周，**公司直接裁员。**
+
+我打包行李，带着 N+1 回了老家。
+本来想着陪父母三个月就开始找工作。
+
+结果在老家：
+- 妈每天嫌我吃饭吧唧嘴
+- 爸每天嫌我开空调费电
+- 邻居二婶每天来催相亲
+- 妈把我的简历挂在小区公告栏
+
+我求"多陪陪父母"，**神明给我安排了6个月超长亲情套餐**。
+
+现在我每天最大的愿望：
+**"求让我回到大城市996"。**`,
+    tags: ['#裁员的福报', '#被迫尽孝', '#许愿要谨慎']
+  }
 ];
 
-// 连锁事件：成功完成愿望后 30% 概率触发
-// 每条事件有"涟漪角色"和"涟漪结果"
+// 连锁事件 - 玄学+跨角色+真情节
 export const chainEvents = {
   liMing: {
     success: [
-      { ripple: 'liMing爸', text: '李明的爸爸今天来庙里加香了，说儿子终于不让他操心。', incense: 25, scope: 'self' },
-      { ripple: 'liMing妈', text: '李明妈把好消息发到了亲戚群，三舅父也跑来上香求保佑。', incense: 30, scope: 'self' },
+      { ripple: 'liMing爸', text: '李明的爸爸今天来庙里加香了，说儿子终于不让他操心。给小神磕了三个头。', incense: 25, scope: 'self' },
+      { ripple: 'liMing妈', text: '李明妈把好消息发到亲戚群，三舅父也跑来上香求保佑。神庙的香炉差点装不下。', incense: 30, scope: 'self' },
       { ripple: 'chenJuan', text: '陈娟在朋友圈给李明点了赞："学弟好棒！"——故事开始有内味儿了。', incense: 15, scope: 'cross', target: 'chenJuan', happinessChange: 5 },
-      { ripple: 'wangWu', text: '王五看到李明四六级过了，也来上香："让我也争口气！"', incense: 10, scope: 'cross', target: 'wangWu', happinessChange: 3 }
+      { ripple: 'wangWu', text: '王五看到李明四六级过了：让我也争口气！来庙里加了把香。', incense: 10, scope: 'cross', target: 'wangWu', happinessChange: 3 },
+      { ripple: '玄学', text: '李明真的看到了陌生人头顶的"幸运数字"了！并且认出了一位灵气98的女生——居然是陈娟。', incense: 30, scope: 'cross', target: 'chenJuan', happinessChange: 8, link: 'liMing-chenJuan' },
+      { ripple: '玄学', text: '李明的乌龟今天对他说了三个字："多读书。" 李明吓得跪在乌龟面前。', incense: 20, scope: 'self' },
+      { ripple: 'liMing前世', text: '李明梦见了战国时代的自己，是个郁郁不得志的术士。醒来后觉得"我至少活得比他自由"。', incense: 18, scope: 'self', happinessChange: 5 }
     ],
     fail: [
-      { ripple: 'liMing妈', text: '李明妈打来电话："不就过个考试吗"，李明摔了门。', incense: -5, scope: 'self', happinessChange: -5 }
+      { ripple: 'liMing妈', text: '李明妈打电话："不就过个考试吗"，李明摔了门。', incense: -5, scope: 'self', happinessChange: -5 },
+      { ripple: '玄学', text: '李明那只乌龟一直瞪着他不说话，仿佛在嘲笑他。', incense: 0, scope: 'self' }
     ]
   },
   wangWu: {
     success: [
-      { ripple: 'wangWu妻', text: '王五拿到 offer 那天，老婆给庙里送了一面锦旗。', incense: 30, scope: 'self' },
+      { ripple: 'wangWu妻', text: '王五的老婆给庙里送了一面锦旗：神明保佑，面馆兴隆。', incense: 30, scope: 'self' },
       { ripple: 'wangWu子', text: '王五给儿子买了新书包，儿子说"长大要做和神仙一样的人"。', incense: 25, scope: 'self' },
-      { ripple: 'liMing', text: '李明听说王五创业成功，也想试试副业，来庙里求灵感。', incense: 15, scope: 'cross', target: 'liMing', happinessChange: 5 }
+      { ripple: 'liMing', text: '李明听说王五创业成功，也想试试副业，来庙里求灵感。', incense: 15, scope: 'cross', target: 'liMing', happinessChange: 5 },
+      { ripple: '玄学', text: '王五救的那只小狐狸今天真的开口了，声音清亮："凡人，谢谢你。" 王五跪了一晚。', incense: 35, scope: 'self', happinessChange: 10 },
+      { ripple: '玄学', text: '面馆门口出现了一个戴斗笠的奇怪客人，吃完面留下了一块金子。王五觉得这不科学。', incense: 30, scope: 'self' },
+      { ripple: 'chenJuan', text: '陈娟和闺蜜来王五面馆打卡，发了小红书。当晚面馆排队到深夜。', incense: 25, scope: 'cross', target: 'chenJuan', happinessChange: 5, link: 'wangWu-chenJuan' }
     ],
     fail: [
       { ripple: 'wangWu', text: '王五在地铁站发呆了一下午，把简历又改了一遍。', incense: 0, scope: 'self' }
@@ -1071,7 +1398,10 @@ export const chainEvents = {
     success: [
       { ripple: 'chenJuan妈', text: '陈娟妈终于停了三天没催婚，全家清静。', incense: 20, scope: 'self' },
       { ripple: 'chenJuan闺蜜', text: '陈娟闺蜜在朋友圈秀她：终于不是单身狗了！', incense: 15, scope: 'self' },
-      { ripple: 'liMing', text: '李明在朋友圈底下评论："学姐恭喜！"两人加了微信。', incense: 18, scope: 'cross', target: 'liMing', happinessChange: 5, link: 'liMing-chenJuan' }
+      { ripple: 'liMing', text: '李明在陈娟的朋友圈下评论了一句："姐姐很美。" 两人加了微信。', incense: 22, scope: 'cross', target: 'liMing', happinessChange: 8, link: 'liMing-chenJuan' },
+      { ripple: '玄学', text: '陈娟收到了已故外婆的第二封信：信里写的是她从未告诉任何人的童年秘密。陈娟哭了一晚。', incense: 30, scope: 'self', happinessChange: 8 },
+      { ripple: '玄学', text: '陈娟养的金鱼今天又用人话说："你今天的发型不错。" 陈娟笑出眼泪。', incense: 20, scope: 'self', happinessChange: 5 },
+      { ripple: '玄学', text: '陈娟在2030年的自己跨过时空给她发了条微信："现在的你已经很好了。" 她哭着回复了"谢谢"。', incense: 35, scope: 'self', happinessChange: 12 }
     ],
     fail: [
       { ripple: 'chenJuan', text: '陈娟回家把酒喝光了，第二天还要早起加班。', incense: 0, scope: 'self', happinessChange: -3 }

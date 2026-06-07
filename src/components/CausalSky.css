@@ -1,9 +1,28 @@
 .causal-sky-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, #1a0e3e 0%, #050018 80%);
+  background: #02010a;
   z-index: 5000;
   overflow: hidden;
+}
+
+/* 宇宙星云背景 */
+.causal-sky-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 60% at 20% 30%, rgba(80, 30, 150, 0.4), transparent 60%),
+    radial-gradient(ellipse 60% 60% at 80% 70%, rgba(20, 60, 180, 0.4), transparent 60%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(180, 60, 100, 0.15), transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+  animation: nebulaPulse 12s ease-in-out infinite;
+}
+
+@keyframes nebulaPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 .sky-canvas {
@@ -11,19 +30,32 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: 2;
+  touch-action: none;
+  cursor: grab;
+}
+
+.sky-canvas:active {
+  cursor: grabbing;
 }
 
 .sky-header {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
   padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent);
   color: white;
+  pointer-events: none;
+}
+
+.sky-header > * {
+  pointer-events: auto;
 }
 
 .sky-close {
@@ -34,113 +66,106 @@
   padding: 6px 14px;
   font-size: 13px;
   cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.sky-close:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .sky-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ffd700, #ff9800);
+  background: linear-gradient(135deg, #ffd700, #fff, #88c4ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-family: 'Noto Serif SC', serif;
-  letter-spacing: 4px;
+  letter-spacing: 6px;
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
 }
 
 .sky-progress {
   font-size: 12px;
   color: #ffd700;
-  background: rgba(255, 215, 0, 0.15);
-  padding: 4px 10px;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
 }
 
-.sky-svg {
+.sky-instructions {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 10;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  letter-spacing: 2px;
+  animation: instrFade 4s ease-in-out infinite;
+}
+
+@keyframes instrFade {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+.sky-legend {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 10;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
   pointer-events: none;
 }
 
-.sky-nodes-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-}
-
-.sky-node {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
-  border: 2px solid;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sky-node.lit {
-  font-size: 18px;
-  animation: starTwinkle 2s ease-in-out infinite;
-}
-
-.sky-node.current {
-  animation: nodePulse 1.5s ease-in-out infinite;
-}
-
-@keyframes starTwinkle {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.15); }
-}
-
-@keyframes nodePulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
-  50% { box-shadow: 0 0 24px rgba(255, 255, 255, 0.9); }
-}
-
-.sky-node:hover {
-  transform: translate(-50%, -50%) scale(1.3);
+.sky-legend span {
+  text-shadow: 0 0 8px currentColor;
 }
 
 .sky-modal {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
 }
 
 .sky-modal-card {
-  background: rgba(20, 10, 45, 0.95);
-  border: 2px solid;
+  background: linear-gradient(135deg, rgba(40, 20, 80, 0.95), rgba(15, 10, 35, 0.95));
+  border: 1px solid rgba(255, 215, 0, 0.4);
   border-radius: 16px;
   padding: 24px;
   max-width: 320px;
   color: white;
   text-align: center;
-  animation: modalUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 40px rgba(100, 80, 200, 0.4);
+  animation: modalUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes modalUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(30px) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .sky-modal-badge {
   display: inline-block;
   padding: 4px 14px;
   border-radius: 12px;
+  background: linear-gradient(135deg, #ffd700, #ff9800);
   font-size: 11px;
   color: #000;
   font-weight: 700;
@@ -151,6 +176,9 @@
   font-size: 20px;
   margin-bottom: 10px;
   font-family: 'Noto Serif SC', serif;
+  background: linear-gradient(135deg, #fff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .sky-modal-card p {
@@ -160,40 +188,16 @@
   line-height: 1.6;
 }
 
-.sky-modal-status {
-  font-size: 13px;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 14px;
-}
-
-.sky-modal-status.lit {
-  background: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
-}
-
-.sky-modal-status.locked {
-  background: rgba(150, 150, 150, 0.2);
-  color: #aaa;
-}
-
 .sky-modal-close {
-  background: linear-gradient(135deg, #ffd700, #ff9800);
-  color: #4a2c1a;
-  border: none;
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
   padding: 8px 24px;
   border-radius: 16px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.sky-legend {
-  position: absolute;
-  bottom: 16px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  z-index: 10;
+.sky-modal-close:hover {
+  background: rgba(255, 215, 0, 0.3);
 }

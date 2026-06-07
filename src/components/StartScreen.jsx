@@ -1,16 +1,28 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import PrologueScreen from './PrologueScreen';
+import { hasSave, getSaveInfo, clearSave } from '../utils/saveLoad';
 import './StartScreen.css';
 
 const StartScreen = () => {
-  const { startGame, setGameState } = useGame();
+  const { startGame, setGameState, continueFromSave } = useGame();
   const [showPrologue, setShowPrologue] = useState(false);
+  const savedInfo = hasSave() ? getSaveInfo() : null;
 
   const handlePrologueComplete = (godName) => {
     setGameState(prev => ({ ...prev, godName }));
     setShowPrologue(false);
     startGame();
+  };
+
+  const handleContinue = () => {
+    if (continueFromSave) continueFromSave();
+  };
+
+  const handleNewGame = () => {
+    if (savedInfo && !window.confirm('开始新游戏会清除当前存档，确定吗？')) return;
+    clearSave();
+    setShowPrologue(true);
   };
 
   if (showPrologue) {
@@ -65,8 +77,14 @@ const StartScreen = () => {
           </div>
         </div>
 
-        <button className="btn btn-primary start-btn" onClick={() => setShowPrologue(true)}>
-          🎯 开始上任
+        {savedInfo && (
+          <button className="btn btn-primary start-btn" onClick={handleContinue} style={{ background: 'linear-gradient(135deg, #4caf50, #2e7d32)', marginBottom: 8 }}>
+            📁 继续上次冒险 · 「{savedInfo.godName}」 Day{savedInfo.day}
+          </button>
+        )}
+
+        <button className={`btn ${savedInfo ? 'btn-outline' : 'btn-primary'} start-btn`} onClick={handleNewGame}>
+          {savedInfo ? '🆕 重新开始' : '🎯 开始上任'}
         </button>
 
         <div className="game-hint">

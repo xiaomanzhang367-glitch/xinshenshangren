@@ -2,6 +2,71 @@
   padding: 0 16px 20px;
 }
 
+.moment-comments {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(212, 165, 116, 0.08);
+  border-radius: 10px;
+  border-left: 3px solid #d4a574;
+}
+
+.moment-comment {
+  font-size: 13px;
+  padding: 4px 0;
+  line-height: 1.5;
+  color: #444;
+}
+
+.moment-comment.is-player {
+  color: #8b4513;
+  font-weight: 600;
+}
+
+.comment-name {
+  font-weight: 600;
+  color: #666;
+  margin-right: 4px;
+}
+
+.moment-comment.is-player .comment-name {
+  color: #8b4513;
+}
+
+.moment-comment-input {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.moment-comment-input input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  font-size: 13px;
+  outline: none;
+}
+
+.moment-comment-input input:focus {
+  border-color: #d4a574;
+}
+
+.moment-comment-input button {
+  padding: 0 14px;
+  background: linear-gradient(135deg, #8b4513, #a0522d);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.moment-comment-input button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .live-likes {
   font-weight: 700;
   color: #e74c3c;

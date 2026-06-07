@@ -83,14 +83,31 @@
 }
 
 .xhs-body {
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.8;
   color: #333;
   background: #fff7e6;
-  padding: 12px 14px;
+  padding: 14px;
   border-radius: 10px;
   border-left: 3px solid #ff8800;
   margin-bottom: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.xhs-body p {
+  margin: 6px 0;
+}
+
+.xhs-body p:empty {
+  height: 8px;
+}
+
+.xhs-body strong {
+  color: #ff2442;
+  font-weight: 700;
+  background: #fff3c4;
+  padding: 0 2px;
 }
 
 .xhs-author {
@@ -178,6 +195,36 @@
 
 .xhs-close-btn:hover {
   transform: translateY(-2px);
+}
+
+.wish-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  border: 1.5px solid rgba(0,0,0,0.15);
+  color: #555;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.wish-close-btn:hover {
+  background: rgba(0,0,0,0.15);
+  transform: scale(1.1) rotate(90deg);
+}
+
+.wish-detail {
+  position: relative;
 }
 
 .tricky-event {
