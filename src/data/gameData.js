@@ -673,7 +673,7 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求我抢到周杰伦的演唱会票',
+      title: '求我抢到人气歌手的演唱会票',
       description: '已经守了三年了，求神明开个外挂！票贩子的票贵到能让我爸妈拿来骂我半年！',
       category: '运气',
       gameType: '接东西',
@@ -719,13 +719,13 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求面馆能上抖音热门',
+      title: '求面馆能上人间热榜热门',
       description: '神明，我研发了"麻辣螺蛳鸭血粉丝面"，结果客人觉得是黑暗料理。求让流量来救我！',
       category: '职场',
       gameType: '接东西',
       options: [
         { text: '一夜爆火', description: '消耗神力20', powerCost: 20, effect: 'excellent' },
-        { text: '小红书出圈', description: '消耗神力10', powerCost: 10, effect: 'normal' },
+        { text: '心愿广场出圈', description: '消耗神力10', powerCost: 10, effect: 'normal' },
         { text: '忽略', description: '香火-5', powerCost: 0, effect: 'ignore', incensePenalty: 5 }
       ]
     },
@@ -941,7 +941,7 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求我妈别再问我朋友圈里那个男生',
+      title: '求我妈别再问我动态墙里那个男生',
       description: '那是同事的合照，她以为是我男友追问了一周！求神明让她转移注意力！',
       category: '家庭',
       gameType: '接东西',
@@ -1255,11 +1255,11 @@ HR又补了一句：
     body: `跟神明说："让我中一次彩票，多少都算！"
 
 第二天打开手机：
-**"恭喜您中得双色球5元！"**
+**"恭喜您中得幸运抽签5元！"**
 
 我以为是诈骗。结果真的中了5块。
 
-**但是！** 我那张彩票是花了10块钱让饿了么跑腿小哥代买的。
+**但是！** 我那张彩票是花了10块钱让跑腿跑腿小哥代买的。
 
 也就是：我赚了5元，倒贴了10元，**实际亏了5元**。
 跑腿小哥还在群里发："今天给老板代买，第二次了 [偷笑]"
@@ -1277,7 +1277,7 @@ HR又补了一句：
 周五晚下班，我手机**掉进马桶**。
 
 接下来两天：
-✅ 没有微信工作群消息
+✅ 没有传讯工作群消息
 ✅ 没有外卖电话
 ✅ 没有妈妈连环视频
 ✅ 没有快递短信
@@ -1330,7 +1330,7 @@ HR又补了一句：
 
 **全部甩给我做。**
 
-她每天微信我："姐救我，这客户你跟一下，我说不了话😭"
+她每天传讯我："姐救我，这客户你跟一下，我说不了话😭"
 "姐这个会议你帮我开一下😭"
 "姐我现在去医院，剩下的Excel拜托你🙏"
 
@@ -1370,7 +1370,7 @@ export const chainEvents = {
     success: [
       { ripple: 'liMing爸', text: '李明的爸爸今天来庙里加香了，说儿子终于不让他操心。给小神磕了三个头。', incense: 25, scope: 'self' },
       { ripple: 'liMing妈', text: '李明妈把好消息发到亲戚群，三舅父也跑来上香求保佑。神庙的香炉差点装不下。', incense: 30, scope: 'self' },
-      { ripple: 'chenJuan', text: '陈娟在朋友圈给李明点了赞："学弟好棒！"——故事开始有内味儿了。', incense: 15, scope: 'cross', target: 'chenJuan', happinessChange: 5 },
+      { ripple: 'chenJuan', text: '陈娟在动态墙给李明点了赞："学弟好棒！"——故事开始有内味儿了。', incense: 15, scope: 'cross', target: 'chenJuan', happinessChange: 5 },
       { ripple: 'wangWu', text: '王五看到李明四六级过了：让我也争口气！来庙里加了把香。', incense: 10, scope: 'cross', target: 'wangWu', happinessChange: 3 },
       { ripple: '玄学', text: '李明真的看到了陌生人头顶的"幸运数字"了！并且认出了一位灵气98的女生——居然是陈娟。', incense: 30, scope: 'cross', target: 'chenJuan', happinessChange: 8, link: 'liMing-chenJuan' },
       { ripple: '玄学', text: '李明的乌龟今天对他说了三个字："多读书。" 李明吓得跪在乌龟面前。', incense: 20, scope: 'self' },
@@ -1388,7 +1388,7 @@ export const chainEvents = {
       { ripple: 'liMing', text: '李明听说王五创业成功，也想试试副业，来庙里求灵感。', incense: 15, scope: 'cross', target: 'liMing', happinessChange: 5 },
       { ripple: '玄学', text: '王五救的那只小狐狸今天真的开口了，声音清亮："凡人，谢谢你。" 王五跪了一晚。', incense: 35, scope: 'self', happinessChange: 10 },
       { ripple: '玄学', text: '面馆门口出现了一个戴斗笠的奇怪客人，吃完面留下了一块金子。王五觉得这不科学。', incense: 30, scope: 'self' },
-      { ripple: 'chenJuan', text: '陈娟和闺蜜来王五面馆打卡，发了小红书。当晚面馆排队到深夜。', incense: 25, scope: 'cross', target: 'chenJuan', happinessChange: 5, link: 'wangWu-chenJuan' }
+      { ripple: 'chenJuan', text: '陈娟和闺蜜来王五面馆打卡，发了心愿广场。当晚面馆排队到深夜。', incense: 25, scope: 'cross', target: 'chenJuan', happinessChange: 5, link: 'wangWu-chenJuan' }
     ],
     fail: [
       { ripple: 'wangWu', text: '王五在地铁站发呆了一下午，把简历又改了一遍。', incense: 0, scope: 'self' }
@@ -1397,11 +1397,11 @@ export const chainEvents = {
   chenJuan: {
     success: [
       { ripple: 'chenJuan妈', text: '陈娟妈终于停了三天没催婚，全家清静。', incense: 20, scope: 'self' },
-      { ripple: 'chenJuan闺蜜', text: '陈娟闺蜜在朋友圈秀她：终于不是单身狗了！', incense: 15, scope: 'self' },
-      { ripple: 'liMing', text: '李明在陈娟的朋友圈下评论了一句："姐姐很美。" 两人加了微信。', incense: 22, scope: 'cross', target: 'liMing', happinessChange: 8, link: 'liMing-chenJuan' },
+      { ripple: 'chenJuan闺蜜', text: '陈娟闺蜜在动态墙秀她：终于不是单身狗了！', incense: 15, scope: 'self' },
+      { ripple: 'liMing', text: '李明在陈娟的动态墙下评论了一句："姐姐很美。" 两人加了传讯。', incense: 22, scope: 'cross', target: 'liMing', happinessChange: 8, link: 'liMing-chenJuan' },
       { ripple: '玄学', text: '陈娟收到了已故外婆的第二封信：信里写的是她从未告诉任何人的童年秘密。陈娟哭了一晚。', incense: 30, scope: 'self', happinessChange: 8 },
       { ripple: '玄学', text: '陈娟养的金鱼今天又用人话说："你今天的发型不错。" 陈娟笑出眼泪。', incense: 20, scope: 'self', happinessChange: 5 },
-      { ripple: '玄学', text: '陈娟在2030年的自己跨过时空给她发了条微信："现在的你已经很好了。" 她哭着回复了"谢谢"。', incense: 35, scope: 'self', happinessChange: 12 }
+      { ripple: '玄学', text: '陈娟在2030年的自己跨过时空给她发了条传讯："现在的你已经很好了。" 她哭着回复了"谢谢"。', incense: 35, scope: 'self', happinessChange: 12 }
     ],
     fail: [
       { ripple: 'chenJuan', text: '陈娟回家把酒喝光了，第二天还要早起加班。', incense: 0, scope: 'self', happinessChange: -3 }
