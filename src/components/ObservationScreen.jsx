@@ -16,6 +16,8 @@ const NPC_COMMENT_POOL = [
   { name: '匿名网友', text: '同款经历' }
 ];
 
+const QUICK_COMMENTS = ['愿你一切顺利！', '这份努力值得点赞！', '继续加油，我会关注的。'];
+
 const GOD_NPC_NAMES = {
   caishen: '财神 💰',
   tudigong: '土地公 🏠',
@@ -58,10 +60,8 @@ const ObservationScreen = ({ standalone = false }) => {
   const { gameState, nextDay, setGameState } = useGame();
   const likeMap = useLiveLikes(gameState.moments);
   const [activeComment, setActiveComment] = useState(null);
-  const [commentInput, setCommentInput] = useState('');
 
-  const handleAddComment = (momentId) => {
-    const text = commentInput.trim();
+  const handleAddComment = (momentId, text) => {
     if (!text) return;
     haptic.light();
     const playerName = gameState.godName || '小神';
@@ -70,7 +70,6 @@ const ObservationScreen = ({ standalone = false }) => {
       ...prev,
       moments: prev.moments.map(m => m.id === momentId ? { ...m, comments: [...(m.comments || []), newComment] } : m)
     }));
-    setCommentInput('');
 
     // 1-2秒后随机神仙/凡人回应
     setTimeout(() => {
@@ -169,17 +168,12 @@ const ObservationScreen = ({ standalone = false }) => {
               )}
 
               {activeComment === moment.id && (
-                <div className="moment-comment-input">
-                  <input
-                    type="text"
-                    value={commentInput}
-                    onChange={e => setCommentInput(e.target.value)}
-                    placeholder={`回复 ${character?.name || '凡人'}…`}
-                    maxLength={60}
-                    onKeyDown={e => { if (e.key === 'Enter') handleAddComment(moment.id); }}
-                    onClick={e => e.stopPropagation()}
-                  />
-                  <button onClick={() => handleAddComment(moment.id)} disabled={!commentInput.trim()}>发送</button>
+                <div className="moment-comment-input moment-comment-options" role="group" aria-label="选择回应">
+                  {QUICK_COMMENTS.map((text) => (
+                    <button type="button" key={text} onClick={() => handleAddComment(moment.id, text)}>
+                      {text}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
