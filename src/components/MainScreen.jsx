@@ -398,7 +398,7 @@ const PrivateChatScreen = ({ godId, onClose, cameFromList }) => {
 
 const GodChatScreen = ({ onClose }) => {
   const { gameState, setGameState } = useGame();
-  const [input, setInput] = useState('');
+  const quickTopics = ['今日香火还顺利吗？', '谁有处理愿望的小妙招？', '辛苦各位同僚了！', '我先去看看人间近况。'];
   const chatEndRef = useRef(null);
 
   const groupMessages = gameState.groupMessages || [];
@@ -407,8 +407,7 @@ const GodChatScreen = ({ onClose }) => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [groupMessages.length]);
 
-  const handleSend = () => {
-    const text = input.trim();
+  const handleSend = (text) => {
     if (!text) return;
     haptic.light();
     const name = gameState.godName || '新神';
@@ -424,7 +423,6 @@ const GodChatScreen = ({ onClose }) => {
       ...prev,
       groupMessages: [...(prev.groupMessages || []), playerMsg]
     }));
-    setInput('');
 
     // 1秒后随机1-2位神仙回复
     setTimeout(() => {
@@ -465,12 +463,6 @@ const GodChatScreen = ({ onClose }) => {
     }, 1200);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
 
   return (
     <div className="god-chat-screen">
@@ -506,16 +498,12 @@ const GodChatScreen = ({ onClose }) => {
         <div ref={chatEndRef} />
       </div>
 
-      <div className="group-chat-input">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="说点啥吧，神仙们都在线..."
-          maxLength={80}
-        />
-        <button onClick={handleSend} disabled={!input.trim()}>发送</button>
+      <div className="group-chat-input group-chat-options" role="group" aria-label="选择群聊话题">
+        {quickTopics.map((topic) => (
+          <button type="button" key={topic} onClick={() => handleSend(topic)}>
+            {topic}
+          </button>
+        ))}
       </div>
     </div>
   );
