@@ -19,14 +19,14 @@ const PrologueScreen = ({ onComplete }) => {
   const [revealLen, setRevealLen] = useState(0);
   const [revealSubLen, setRevealSubLen] = useState(0);
   const [doneTyping, setDoneTyping] = useState(false);
-  const [godName, setGodName] = useState('');
+  const [godName, setGodName] = useState('小神');
   const [seal, setSeal] = useState(false);
   const printRef = useRef({ active: null });
 
   const currentLine = SCRIPT[step];
   const isLast = step === SCRIPT.length - 1;
 
-  const tempName = godName.trim() || '小神';
+  const tempName = godName || '小神';
   const fullText = currentLine.text.replace(/\{name\}/g, tempName);
   const fullSub = (currentLine.sub || '').replace(/\{name\}/g, tempName);
 
@@ -88,7 +88,7 @@ const PrologueScreen = ({ onComplete }) => {
 
   const handleStart = () => {
     haptic.success();
-    onComplete(godName.trim() || '小神');
+    onComplete(godName || '小神');
   };
 
   return (
@@ -160,17 +160,23 @@ const PrologueScreen = ({ onComplete }) => {
             onPointerDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <input
-              type="text"
-              maxLength={6}
-              placeholder="例：长安君 / 小招财"
-              value={godName}
-              onChange={(e) => setGodName(e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              autoFocus
-            />
-            <div className="name-hint-paper">不填则默认为「小神」</div>
+<div className="name-options-paper" role="group" aria-label="选择预设神号">
+              {['小神', '灵犀君', '青岚君', '烛明君'].map((name) => (
+                <button
+                  type="button"
+                  key={name}
+                  className={'name-option-paper ' + (godName === name ? 'selected' : '')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    haptic.light();
+                    setGodName(name);
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+            <div className="name-hint-paper">请选择一个预设神号</div>
             <button className="paper-go-btn" onClick={(e) => { e.stopPropagation(); handleStart(); }}>
               ⛩️ 开 门 接 客
             </button>
