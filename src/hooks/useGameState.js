@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { initialCharacters, initialGods, initialWishes, wishTemplates, gameConfig, godMessages, godChatStarters } from '../data/gameData';
-import { saveGame, loadGame } from '../utils/saveLoad';
 
 export const useGameState = () => {
   const [gameState, setGameState] = useState({
@@ -44,13 +43,6 @@ export const useGameState = () => {
 
   const messageTimerRef = useRef(null);
   const lastMessageTimeRef = useRef({});
-
-  // 自动保存（每次 state 变化）
-  useEffect(() => {
-    if (gameState.phase === 'wish' || gameState.phase === 'result' || gameState.phase === 'finale') {
-      saveGame(gameState);
-    }
-  }, [gameState]);
 
   // 被动收入已移除 - 资源完全靠玩家自己挣
 
@@ -443,14 +435,8 @@ export const useGameState = () => {
     }
   }, [gameState.characters, addMoment, generateNewWishes, updateDivineAttributes, triggerGodMessage]);
 
-  const continueFromSave = useCallback(() => {
-    const saved = loadGame();
-    if (saved) {
-      setGameState(prev => ({ ...prev, ...saved }));
-      return true;
-    }
-    return false;
-  }, []);
+  // 互动空间版仅保留当前会话状态，不读取或恢复历史进度。
+  const continueFromSave = useCallback(() => false, []);
 
   const startGame = useCallback(() => {
     setGameState(prev => {

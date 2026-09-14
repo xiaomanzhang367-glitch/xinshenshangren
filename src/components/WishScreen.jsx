@@ -378,7 +378,7 @@ const WishScreen = () => {
   );
 };
 
-// 小红书爆贴风的彩蛋
+// 人间热帖风的彩蛋
 const RANDOM_TITLES = [
   '兄弟们我真的服了…',
   '求神仙小心愿望，神仙：好嘞您嘞！',
@@ -401,6 +401,14 @@ const RANDOM_COMMENTS = [
   { name: '万事亨通', text: '楼主请问怎么联系到这位神仙？' }
 ];
 const RANDOM_IMAGES = ['🤡', '😭', '🙃', '🥲', '😶‍🌫️', '👻', '🫠', '🤯', '😵‍💫', '🥹'];
+
+const renderFormattedLine = (line) => (
+  line.split(/(\*\*.*?\*\*)/g).map((part, index) => (
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={index}>{part.slice(2, -2)}</strong>
+      : <React.Fragment key={index}>{part}</React.Fragment>
+  ))
+);
 
 const TrickyEventOverlay = ({ event, onConfirm }) => {
   const [liked, setLiked] = useState(false);
@@ -428,7 +436,7 @@ const TrickyEventOverlay = ({ event, onConfirm }) => {
       <div className="xhs-card" onClick={e => e.stopPropagation()}>
         {/* 顶部小红书 fake 导航 */}
         <div className="xhs-topbar">
-          <span>📱 求神记 · 玄学小红书</span>
+          <span>📱 求神记 · 人间心愿簿</span>
           <span style={{ fontSize: 11, color: '#999' }}>🔥 神仙发威了</span>
         </div>
 
@@ -443,7 +451,7 @@ const TrickyEventOverlay = ({ event, onConfirm }) => {
           <h3 className="xhs-title">🔥 {title}</h3>
           <div className="xhs-body">
             {bodyText.split('\n').map((line, i) => (
-              <p key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+              <p key={i}>{renderFormattedLine(line)}</p>
             ))}
           </div>
 

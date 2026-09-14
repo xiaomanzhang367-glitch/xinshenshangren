@@ -1,0 +1,47 @@
+name: Package interactive-space release
+
+on:
+  push:
+    branches:
+      - codex/interactive-space-compliance
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build static release
+        run: npm run build
+
+      - name: Verify interactive-space constraints
+        run: node scripts/verify-interactive-space.mjs
+
+      - name: Create upload package
+        run: |
+          cd dist
+          zip -r ../interactive-space-upload.zip .
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: interactive-space-upload
+          path: interactive-space-upload.zip
+          if-no-files-found: error
+          retention-days: 7

@@ -197,3 +197,15 @@
 .observation-actions {
   padding: 20px 0;
 }
+
+
+.moment-comment-options {
+  flex-wrap: wrap;
+}
+
+.moment-comment-options button {
+  flex: 1 1 100%;
+  min-height: 34px;
+  padding: 8px 12px;
+  text-align: left;
+}

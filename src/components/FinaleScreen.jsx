@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { useGame } from '../context/GameContext';
 import { calcDivineRank, getDivineEnvoy } from '../utils/divineRanks';
 import haptic from '../utils/haptic';
@@ -36,9 +36,7 @@ const pickFate = (pool, score) => {
 };
 
 const FinaleScreen = () => {
-  const { gameState, setGameState } = useGame();
-  const [showShare, setShowShare] = useState(false);
-  const posterRef = useRef(null);
+  const { gameState } = useGame();
 
   const rank = calcDivineRank(gameState.divineAttributes);
   const envoy = getDivineEnvoy(gameState.totalScore || 0);
@@ -64,30 +62,9 @@ const FinaleScreen = () => {
 
   const godName = gameState.godName || '小神';
 
-  const handleShare = async () => {
+  const handleScreenshot = () => {
     haptic.medium();
-    setShowShare(true);
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(posterRef.current, { backgroundColor: null, scale: 2, useCORS: true });
-      const dataUrl = canvas.toDataURL('image/png');
-      // 尝试 share API，否则下载
-      if (navigator.share && navigator.canShare) {
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], `神仙简历-${godName}.png`, { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: `${godName}的神仙简历`, text: `我是 ${rank.name}，你也来当神仙吧` });
-          return;
-        }
-      }
-      // 下载
-      const link = document.createElement('a');
-      link.download = `神仙简历-${godName}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (e) {
-      alert('生成海报失败，请截屏分享：' + e.message);
-    }
+    window.alert('这是游戏内纪念卡，请使用设备自带截图功能保存。');
   };
 
   const handleRestart = () => {
@@ -105,7 +82,7 @@ const FinaleScreen = () => {
       </div>
 
       <div className="poster-wrapper">
-        <div className="poster" ref={posterRef} style={{ background: rank.bgGradient }}>
+        <div className="poster" style={{ background: rank.bgGradient }}>
           {/* 顶部 */}
           <div className="poster-top">
             <div className="poster-deco">⛩️</div>
@@ -178,18 +155,14 @@ const FinaleScreen = () => {
             <div className="poster-stamp">
               <div className="stamp-text">神号<br/>{godName}</div>
             </div>
-            <div className="poster-qr">
-              <img src="/海报素材/二维码-黑白.png" alt="qr" style={{ width: 80, height: 80 }} />
-              <div className="qr-text">扫码也当神仙</div>
-            </div>
           </div>
-          <div className="poster-footer">⛩️ 新神上任 · xinshenshangren</div>
+          <div className="poster-footer">⛩️ 新神上任 · 游戏内纪念卡</div>
         </div>
       </div>
 
       <div className="finale-actions">
-        <button className="finale-btn primary" onClick={handleShare}>
-          📤 分享海报
+        <button className="finale-btn primary" onClick={handleScreenshot}>
+          📷 截图留念
         </button>
         <button className="finale-btn" onClick={handleRestart}>
           🔄 再玩一次（解锁新结局）
