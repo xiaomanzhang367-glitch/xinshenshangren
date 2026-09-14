@@ -719,7 +719,7 @@ export const wishTemplates = {
       ]
     },
     {
-      title: '求面馆能上人间热榜热门',
+      title: '求面馆登上人间热榜',
       description: '神明，我研发了"麻辣螺蛳鸭血粉丝面"，结果客人觉得是黑暗料理。求让流量来救我！',
       category: '职场',
       gameType: '接东西',
@@ -1259,7 +1259,7 @@ HR又补了一句：
 
 我以为是诈骗。结果真的中了5块。
 
-**但是！** 我那张彩票是花了10块钱让跑腿跑腿小哥代买的。
+**但是！** 我那张彩票是花了10块钱让跑腿小哥代买的。
 
 也就是：我赚了5元，倒贴了10元，**实际亏了5元**。
 跑腿小哥还在群里发："今天给老板代买，第二次了 [偷笑]"
@@ -1388,7 +1388,7 @@ export const chainEvents = {
       { ripple: 'liMing', text: '李明听说王五创业成功，也想试试副业，来庙里求灵感。', incense: 15, scope: 'cross', target: 'liMing', happinessChange: 5 },
       { ripple: '玄学', text: '王五救的那只小狐狸今天真的开口了，声音清亮："凡人，谢谢你。" 王五跪了一晚。', incense: 35, scope: 'self', happinessChange: 10 },
       { ripple: '玄学', text: '面馆门口出现了一个戴斗笠的奇怪客人，吃完面留下了一块金子。王五觉得这不科学。', incense: 30, scope: 'self' },
-      { ripple: 'chenJuan', text: '陈娟和闺蜜来王五面馆打卡，发了心愿广场。当晚面馆排队到深夜。', incense: 25, scope: 'cross', target: 'chenJuan', happinessChange: 5, link: 'wangWu-chenJuan' }
+      { ripple: 'chenJuan', text: '陈娟和闺蜜来王五面馆打卡，发了一条心愿广场动态，当晚面馆排队到深夜。', incense: 25, scope: 'cross', target: 'chenJuan', happinessChange: 5, link: 'wangWu-chenJuan' }
     ],
     fail: [
       { ripple: 'wangWu', text: '王五在地铁站发呆了一下午，把简历又改了一遍。', incense: 0, scope: 'self' }
